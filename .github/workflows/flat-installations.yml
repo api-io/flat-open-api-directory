@@ -21,8 +21,9 @@ jobs:
           deno-version: v1.1.2
       - id: matrix
         run: |
-          export DATA= cat ${installations_path}
-          echo '::set-output name=value::${DATA}'
+          export DATA = cat ${{installations_path}}
+          echo ${{DATA}}
+          echo 'value=${DATA}' >> $GITHUB_OUTPUT
   build:
     needs: [ setup ]
     runs-on: ubuntu-latest
