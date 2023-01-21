@@ -41,6 +41,6 @@ jobs:
       - name: Fetch data 
         uses: githubocto/flat@v3
         with:
-          http_url: https://api.github.com/installation/repositories
+          http_url: https://api.github.com/app/installations
           downloaded_filename: store/repositories.json
-          authorization:  ${TOKEN} 
+          authorization: Bearer ${(steps.generate_token.outputs.token}}
