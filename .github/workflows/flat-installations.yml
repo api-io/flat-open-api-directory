@@ -11,14 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.value }}
+    
     steps:
+      - uses: actions/checkout@v3
+
       - name: Download Deno
         uses: denolib/setup-deno@master
         with:
           deno-version: v1.1.2
       - id: matrix
         run: |
-          deno eval -p  "await Deno.readTextFile('../${{inputs.installations_path}}')"
+          deno eval -p  "await Deno.readTextFile('${{inputs.installations_path}}')"
   build:
     needs: [ setup ]
     runs-on: ubuntu-latest
