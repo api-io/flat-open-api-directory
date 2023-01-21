@@ -41,8 +41,11 @@ jobs:
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
         uses: githubocto/flat@v3
+        env:
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: https://api.github.com/app/installations
           downloaded_filename: store/repositories.json
-          authorization: $(steps.generate_token.outputs.authorization}
+          authorization: ${{ AUTH }}
+
           
