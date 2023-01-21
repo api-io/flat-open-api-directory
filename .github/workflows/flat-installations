@@ -1,4 +1,4 @@
-name: flat-app-installations
+name: flat-installations
 
 on:
   push:
