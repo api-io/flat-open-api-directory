@@ -18,9 +18,7 @@ jobs:
           deno-version: v1.1.2
       - id: matrix
         run: |
-          deno eval "await Deno.readTextFile('${{inputs.installations_path}}')" | $Data
-          echo  $Data
-          echo 'value= $Data' >> $GITHUB_OUTPUT
+          deno eval -p  "await Deno.readTextFile('../${{inputs.installations_path}}')"
   build:
     needs: [ setup ]
     runs-on: ubuntu-latest
