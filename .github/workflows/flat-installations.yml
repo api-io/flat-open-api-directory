@@ -1,3 +1,4 @@
+name: flat-installations
 on:
   workflow_dispatch:
     inputs:
