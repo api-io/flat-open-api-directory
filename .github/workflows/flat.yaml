@@ -32,5 +32,5 @@ jobs:
         with:
           http_url: https://api.github.com/graphql
           downloaded_filename: queryResponse.json
-          authorization: ${{ env.APP_KEY }} # an API key/secret for the GitHub API being used in the grahpQL query
+          authorization: ${{ env.APP_TOKEN }} # an API key/secret for the GitHub API being used in the grahpQL query
           axios_config: query.json # a file with axios config details, including a graphQL query
