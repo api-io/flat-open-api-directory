@@ -12,8 +12,9 @@ const auth = createAppAuth({
   const appAuthentication = await auth({
     type: "app",
   });
-  
+
   // Retrieve JSON Web Token (JWT) to authenticate as app
 //   const appAuthentication = await auth({ type: "app" });
 
   console.log( appAuthentication.token);
+  Deno.env.set("APP_TOKEN",appAuthentication.token );

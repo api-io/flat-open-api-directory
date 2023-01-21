@@ -23,7 +23,7 @@ jobs:
       - name: get_app_jwt
         run: |
           deno --version
-          deno run  --allow-read ../auth/gh_auth.ts | Deno.env.set("APP_KEY", _);
+          deno run  --allow-read ../auth/gh_auth.ts
           
 
       # The third step is a Flat Action step. We fetch the data in the http_url and save it as downloaded_filename
