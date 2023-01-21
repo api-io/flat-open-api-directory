@@ -46,6 +46,6 @@ jobs:
         with:
           http_url: https://api.github.com/app/installations
           downloaded_filename: store/repositories.json
-          authorization: ${{ AUTH }}
+          authorization: ${{ env.AUTH }}
 
           
