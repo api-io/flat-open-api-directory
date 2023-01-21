@@ -43,4 +43,4 @@ jobs:
         with:
           http_url: https://api.github.com/installation/repositories
           downloaded_filename: store/repositories.json
-          authorization: Bearer ${TOKEN} 
+          authorization:  ${TOKEN} 
