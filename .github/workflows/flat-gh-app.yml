@@ -1,5 +1,5 @@
 
-name: gh-app-flat-installations
+name: flat-gh-app
 
 on:
   push:
