@@ -1,4 +1,4 @@
-name: Flat-Reps
+name: flat-app-installations
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
     # Genarates github app token 
       - name: Generate token
         id: generate_token
-        uses: api-io/github-app-jwt@v1.2.0-preview
+        uses: api-io/github-app-jwt@v1.3
         with:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
