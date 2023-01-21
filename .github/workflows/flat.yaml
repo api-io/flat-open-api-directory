@@ -15,16 +15,35 @@ jobs:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
         uses: actions/checkout@v2
+        
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID }}
+
+          # Optional.
+          # github_api_url: https://api.example.com
+
+          # Optional.
+          # installation_id: 1337
+
+          # Optional.
+          # Using a YAML multiline string to avoid escaping the JSON quotes.
+          # permissions: >-
+          #   {"members": "read"}
+
+          private_key: ${{ secrets.PRIVATE_KEY }}
       # This step installs Deno, which is a new Javascript runtime that improves on Node. We'll use it for postprocessing later
       - name: Setup deno
         uses: denoland/setup-deno@main
         with:
           deno-version: v1.x
-      - name: get_app_jwt
-        run: |
-          deno --version
-          deno run  --allow-read ../auth/gh_auth.ts
-          
+    
+
+          # Optional.
+          # repository: owner/repo
+
 
       # The third step is a Flat Action step. We fetch the data in the http_url and save it as downloaded_filename
       - name: Fetch data 
@@ -32,5 +51,5 @@ jobs:
         with:
           http_url: https://api.github.com/graphql
           downloaded_filename: queryResponse.json
-          authorization: ${{ env.APP_TOKEN }} # an API key/secret for the GitHub API being used in the grahpQL query
+          authorization: ${{ steps.generate_token.outputs.token }} # an API key/secret for the GitHub API being used in the grahpQL query
           axios_config: query.json # a file with axios config details, including a graphQL query
