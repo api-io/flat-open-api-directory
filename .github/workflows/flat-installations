@@ -3,10 +3,10 @@ name: flat-installations
 on:
   push:
     paths:
-      - .github/workflows/flat-app-installations.yml # Only run a new workflow every time this file (flat.yaml) file changes
-  workflow_dispatch: # Required even though this is currently empty
+      - .github/workflows/flat-installations.yml # Only run a new workflow every time this file (flat-installations.yaml) file changes
+  workflow_dispatch: 
   schedule:
-    - cron: '0 0 1 * *' # Run this workflow every month on the first day of the month
+    - cron: '0 1 0 * *' 
 
 jobs:
   scheduled:
