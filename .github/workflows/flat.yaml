@@ -1,4 +1,4 @@
-name: Flat
+name: Flat-Reps
 
 on:
   push:
@@ -12,11 +12,12 @@ jobs:
   scheduled:
     runs-on: ubuntu-latest
     environment: flat-api-app
-    steps: # This workflow has 3 steps
+    steps: # This workflow has 4 steps
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
         uses: actions/checkout@v2
-
+  
+    # Genarates github app token 
       - name: Generate token
         id: generate_token
         uses: api-io/github-app-jwt@v1
@@ -24,18 +25,13 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           
-      # This step installs Deno, which is a new Javascript runtime that improves on Node. We'll use it for postprocessing later
+      # This step installs Deno, which is a new Javascript runtime that improves on Node. 
       - name: Setup deno
         uses: denoland/setup-deno@main
         with:
-          deno-version: v1.x
-    
+          deno-version: v1.x 
 
-          # Optional.
-          # repository: owner/repo
-
-
-      # The third step is a Flat Action step. We fetch the data in the http_url and save it as downloaded_filename
+      # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
         uses: githubocto/flat@v3
         with:
