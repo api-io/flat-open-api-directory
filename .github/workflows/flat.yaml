@@ -43,4 +43,4 @@ jobs:
         with:
           http_url: https://api.github.com/installation/repositories
           downloaded_filename: store/repositories.json
-          authorization: Bearer ${{ steps.generate_token.outputs.token }} # an API key/secret for the GitHub API being used in the grahpQL query
+          authorization: Bearer ${TOKEN} 
