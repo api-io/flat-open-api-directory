@@ -22,7 +22,7 @@ jobs:
         id: generate_token
         uses: api-io/github-app-jwt@v1.2.0-preview
         with:
-          app_id: ${{ env.APP_ID }}
+          app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           
       - name: Print token
