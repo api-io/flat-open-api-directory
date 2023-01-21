@@ -1,0 +1,33 @@
+on:
+  workflow_dispatch:
+    inputs:
+      installations_path: 
+        required: true
+        type: text
+      enviorment:
+        required: true
+        type: text
+jobs:
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      - name: Download Deno
+        uses: denolib/setup-deno@master
+        with:
+          deno-version: v1.1.2
+      - id: matrix
+        run: |
+          export DATA= cat ${installations_path}
+          echo '::set-output name=value::${DATA}'
+  build:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        value: ${{fromJson(needs.setup.outputs.matrix)}}
+    steps:
+      - run: |
+          echo "${{ matrix.value }}"
