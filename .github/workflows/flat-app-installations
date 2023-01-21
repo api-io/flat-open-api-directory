@@ -3,7 +3,7 @@ name: flat-app-installations
 on:
   push:
     paths:
-      - .github/workflows/flat.yml # Only run a new workflow every time this file (flat.yaml) file changes
+      - .github/workflows/flat-app-installations.yml # Only run a new workflow every time this file (flat.yaml) file changes
   workflow_dispatch: # Required even though this is currently empty
   schedule:
     - cron: '0 0 1 * *' # Run this workflow every month on the first day of the month
@@ -44,8 +44,8 @@ jobs:
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
-          http_url: https://api.github.com/app/installations
-          downloaded_filename: store/repositories.json
+          http_url:  ${{ vars.GITHUB_URL }}/app/installations
+          downloaded_filename: store/installations.json
           authorization: ${{ env.AUTH }}
 
           
