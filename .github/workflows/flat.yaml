@@ -44,4 +44,5 @@ jobs:
         with:
           http_url: https://api.github.com/app/installations
           downloaded_filename: store/repositories.json
-          authorization: ${(steps.generate_token.outputs.authorization}}
+          authorization: $(steps.generate_token.outputs.authorization}
+          
