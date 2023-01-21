@@ -11,11 +11,12 @@ on:
 jobs:
   scheduled:
     runs-on: ubuntu-latest
+    environment: github-app-token
     steps: # This workflow has 3 steps
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
         uses: actions/checkout@v2
-        
+
       - name: Generate token
         id: generate_token
         uses: tibdex/github-app-token@v1
