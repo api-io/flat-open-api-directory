@@ -28,8 +28,9 @@ jobs:
       - name: Print token
         env:
           TOKEN: ${{ steps.generate_token.outputs.token }}
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
         run: |
-          echo "The generated token is masked: ${TOKEN}"
+          echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"
      
       # This step installs Deno, which is a new Javascript runtime that improves on Node. 
       - name: Setup deno
@@ -43,4 +44,4 @@ jobs:
         with:
           http_url: https://api.github.com/app/installations
           downloaded_filename: store/repositories.json
-          authorization: Bearer ${(steps.generate_token.outputs.token}}
+          authorization: ${(steps.generate_token.outputs.authorization}}
