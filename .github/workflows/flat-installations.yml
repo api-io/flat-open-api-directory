@@ -18,7 +18,7 @@ jobs:
           deno-version: v1.1.2
       - id: matrix
         run: |
-          export DATA = cat ${{inputs.installations_path}}
+          deno export DATA = cat ${{inputs.installations_path}}
           echo ${{DATA}}
           echo 'value=${DATA}' >> $GITHUB_OUTPUT
   build:
