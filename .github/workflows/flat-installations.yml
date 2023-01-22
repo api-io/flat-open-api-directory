@@ -65,6 +65,6 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url:  ${{ matrix.value.repositories_url}}
-          downloaded_filename: store/${{ vars.APP_ID }}/installations.json
+          downloaded_filename: store/${{ vars.APP_ID }}/repositories.json
           authorization: ${{ env.AUTH }}
     needs: [ setup ]
