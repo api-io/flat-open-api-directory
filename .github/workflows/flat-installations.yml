@@ -21,9 +21,7 @@ jobs:
           deno-version: v1.1.2
       - id: matrix
         run: |
-          deno eval "Deno.env.set('DATA', await Deno.readTextFile('${{inputs.installations_path}}')"
-          deno eval "Deno.env.get('DATA')" -p
-          echo ${DATA} 
+          deno eval "await Deno.readTextFile('${{inputs.installations_path}}')"
           
   build:
     needs: [ setup ]
