@@ -38,7 +38,7 @@ jobs:
     # Genarates github app token 
       - name: Generate token
         id: generate_token
-        uses: getsentry/action-github-app-token@v2
+        uses: api-io/github-app-jwt@v1.2.4
         with:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
