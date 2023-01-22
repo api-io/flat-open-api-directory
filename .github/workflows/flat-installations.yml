@@ -31,6 +31,8 @@ jobs:
     steps:
       - run: |
           echo "${{toJson(matrix)}}" 
+          echo "${{matrix.value.id}}" 
+
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
         uses: actions/checkout@v2
@@ -42,7 +44,7 @@ jobs:
         with:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
-          installation_id: ${{ matrix.id }}
+          installation_id: ${{ matrix.value.id }}
       - name: Print token
         env:
           TOKEN: ${{ steps.generate_token.outputs.token }}
