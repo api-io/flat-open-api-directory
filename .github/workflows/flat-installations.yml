@@ -30,7 +30,7 @@ jobs:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
     steps:
       - run: |
-          echo "${{ matrix.id }}" 
+          echo "${{toJson(matrix)}}" 
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
         uses: actions/checkout@v2
