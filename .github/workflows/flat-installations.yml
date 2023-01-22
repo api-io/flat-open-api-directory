@@ -21,12 +21,48 @@ jobs:
           echo "::set-output name=matrix::${JSON//'%'/'%25'}"
           
 
-  build:
-    needs: [ setup ]
+
+  scheduled:
+    environment: flat-api-app
     runs-on: ubuntu-latest
     strategy:
       matrix:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
     steps:
       - run: |
-          echo "${{ matrix.value }}"
+          echo "${{ matrix.id }}" 
+      # The first step is to check out the repository so it can read the files inside of it and do other operations
+      - name: Check out repo
+        uses: actions/checkout@v2
+  
+    # Genarates github app token 
+      - name: Generate token
+        id: generate_token
+        uses: getsentry/action-github-app-token@v2
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          installation_id: ${{ matrix.id }}
+      - name: Print token
+        env:
+          TOKEN: ${{ steps.generate_token.outputs.token }}
+          AUTH: bearer ${{ steps.generate_token.outputs.authorization }}
+        run: |
+          echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"
+     
+      # This step installs Deno, which is a new Javascript runtime that improves on Node. 
+      - name: Setup deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: v1.x 
+
+      # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
+      - name: Fetch data 
+        uses: githubocto/flat@v3
+        env:
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+        with:
+          http_url: https://api.github.com/app/installation/repositories
+          downloaded_filename: store/${{ vars.APP_ID }}/installations.json
+          authorization: ${{ env.AUTH }}
+    needs: [ setup ]
