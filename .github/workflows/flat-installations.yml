@@ -21,8 +21,9 @@ jobs:
           deno-version: v1.1.2
       - id: matrix
         run: |
-          deno eval -p  "export DATA=await Deno.readTextFile('${{inputs.installations_path}}')"
+          deno eval "Deno.env.set('DATA', await Deno.readTextFile('${{inputs.installations_path}}')"
           deno eval "Deno.env.get('DATA')" -p
+          echo ${DATA} 
           
   build:
     needs: [ setup ]
