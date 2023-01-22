@@ -64,7 +64,7 @@ jobs:
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
-          http_url: https://api.github.com/app/installation/repositories
+          http_url:  ${{ matrix.value.repositories_url}}
           downloaded_filename: store/${{ vars.APP_ID }}/installations.json
           authorization: ${{ env.AUTH }}
     needs: [ setup ]
