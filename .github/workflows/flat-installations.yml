@@ -48,7 +48,7 @@ jobs:
       - name: Print token
         env:
           TOKEN: ${{ steps.generate_token.outputs.token }}
-          AUTH: bearer ${{ steps.generate_token.outputs.authorization }}
+          AUTH: ${{ steps.generate_token.outputs.authorization }}
         run: |
           echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"
      
