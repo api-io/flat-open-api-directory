@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: set installation repos file path
         run: |
-          echo "INSTALLATION_REPO_PATH=${{format(needs.setup.outputs.i_file_format, matrix.value.id)" >> "$GITHUB_ENV"
+          echo "INSTALLATION_REPO_PATH=${{format(needs.setup.outputs.i_file_format, matrix.value.id)}}" >> "$GITHUB_ENV"
 
       - name: print logs
         run: |
