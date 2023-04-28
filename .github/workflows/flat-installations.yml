@@ -116,12 +116,13 @@ jobs:
           echo "file_list=$file_list" >> $GITHUB_STEP_SUMMARY
           index_file=${{needs.setup.outputs.repositories_dir}}/index.json 
           echo $index_file >> $GITHUB_STEP_SUMMARY
+          
           repositories=()
           for file in $file_list;
             do
-                text=$(cat $file)
-                json=${{fromJSON($text)}} 
-                repositories+=$json.repositories
+                text=`cat $file`
+                json=`echo $(jq -r '.repositories' <<< "$text")`
+                repositories+=json
             done;
           echo "repositories=$repositories" >> $GITHUB_STEP_SUMMARY
           echo "repositories=${{toJson(repositories)}}" > $index_file
