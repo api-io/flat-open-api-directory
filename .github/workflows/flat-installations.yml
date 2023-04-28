@@ -1,4 +1,5 @@
 name: flat-installations
+environment: flat-api-app
 on:
   workflow_dispatch:
     inputs:
@@ -6,8 +7,8 @@ on:
         type: string
         description: installation json file URL
 env:
-  REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || "store/${{ vars.APP_ID }}/repositories"}}
-  INSTALLATIONS_PATH: ${{vars.INSTALLATIONS_PATH "store/${{ vars.APP_ID }}/installations.json"}}
+  REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
+  INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
 jobs:
 
   setup:
@@ -15,22 +16,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-       
+
     steps:
       - uses: actions/checkout@v3
       - name: extract installation path
         id: path
         continue-on-error: true         
         run: |
-          default_path="store/${{ vars.APP_ID }}/installations.json"
-          echo "INSTALLATIONS_PATH=${{inputs.installations_path || vars.INSTALLATIONS_PATH || $default_path }}" >> "$GITHUB_ENV"
           echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
       - name: extract repositories path
         id: path
         continue-on-error: true         
         run: |
-          default_repo_path="store/${{ vars.APP_ID }}/repositories.json"
-          echo "REPOSITORIES_PATH=${{inputs.repositories_path || vars.REPOSITORIES_PATH || $default_repo_path }}" >> "$GITHUB_ENV"
           echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
