@@ -125,4 +125,5 @@ jobs:
                 repositories+=json
             done;
           echo "repositories=$repositories" >> "$GITHUB_OUTPUT"
-      
+          echo "$repositories" > "$index_file"
+
