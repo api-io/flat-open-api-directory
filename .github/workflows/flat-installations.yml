@@ -124,5 +124,5 @@ jobs:
                 json=`echo $(jq -r '.repositories' <<< "$text")`
                 repositories+=json
             done;
-          echo "repositories=$repositories" >> $GITHUB_STEP_SUMMARY
-          echo "repositories=${{toJson(repositories)}}" > $index_file
+          echo "repositories=$repositories" >> "$GITHUB_OUTPUT"
+      
