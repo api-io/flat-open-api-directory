@@ -13,14 +13,15 @@ on:
   schedule:
     - cron: '0 0 1 * *' # Run this workflow every month on the first day of the month
     
-env:
-  REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || "store/${{ vars.APP_ID }}/repositories"}}
-  INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || "store/${{ vars.APP_ID }}/installations.json"}}
 
 jobs:
   scheduled:
     runs-on: ubuntu-latest
     environment: flat-api-app
+    env:
+      REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || "store/${{ vars.APP_ID }}/repositories"}}
+      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || "store/${{ vars.APP_ID }}/installations.json"}}
+
     steps: 
       # This workflow has 4 steps
       # The first step is to check out the repository so it can read the files inside of it and do other operations
