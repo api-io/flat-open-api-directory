@@ -33,8 +33,7 @@ jobs:
         run: |
           JSON=$(cat ${{env.INSTALLATIONS_PATH}}) > $GITHUB_STEP_SUMMARY
           echo "JSON_RESPONSE<<$JSON" >> "$GITHUB_ENV"
-          installations=${{fromJSON(env.JSON_RESPONSE)}} > $GITHUB_STEP_SUMMARY
-          echo "matrix=$installations" >> "$GITHUB_OUTPUT"
+          echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
   
   
   
