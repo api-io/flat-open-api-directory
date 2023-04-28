@@ -4,8 +4,12 @@ name: flat-gh-app
 on:
   push:
     paths:
-      - .github/workflows/flat.yml # Only run a new workflow every time this file (flat.yaml) file changes
-  workflow_dispatch: # Required even though this is currently empty
+      - .github/workflows/flat-gh-app.yml # Only run a new workflow every time this file (flat.yaml) file changes
+  workflow_dispatch:
+    inputs:
+      installations_path: 
+        type: string
+        description: installation json file URL
   schedule:
     - cron: '0 0 1 * *' # Run this workflow every month on the first day of the month
 
@@ -13,8 +17,17 @@ jobs:
   scheduled:
     runs-on: ubuntu-latest
     environment: flat-api-app
-    steps: # This workflow has 4 steps
+    steps: 
+      # This workflow has 4 steps
       # The first step is to check out the repository so it can read the files inside of it and do other operations
+      - name: extract installation path
+        id: path
+        continue-on-error: true         
+        run: |
+          default_path="store/${{ vars.APP_ID }}/installations.json"
+          echo "INSTALLATIONS_PATH=${{inputs.installations_path || vars.INSTALLATIONS_PATH || $default_path }}" >> "$GITHUB_ENV"
+          echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
+
       - name: Check out repo
         uses: actions/checkout@v3
   
@@ -39,12 +52,12 @@ jobs:
         with:
           deno-version: v1.x 
 
-      # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
+      # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
       - name: Fetch data 
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: https://api.github.com/app/installations
-          downloaded_filename: store/${{ vars.APP_ID }}/installations.json
+          downloaded_filename: ${{env.INSTALLATIONS_PATH}}
           authorization: ${{ env.AUTH }}

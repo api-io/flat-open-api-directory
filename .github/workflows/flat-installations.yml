@@ -3,22 +3,40 @@ on:
   workflow_dispatch:
     inputs:
       installations_path: 
-        required: true
-        type: text
+        type: string
+        description: installation json file URL
+env:
+  REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || "store/${{ vars.APP_ID }}/repositories"}}
+  INSTALLATIONS_PATH: ${{vars.INSTALLATIONS_PATH "store/${{ vars.APP_ID }}/installations.json"}}
 jobs:
 
   setup:
+    environment: flat-api-app
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-      
+       
     steps:
       - uses: actions/checkout@v3
-
+      - name: extract installation path
+        id: path
+        continue-on-error: true         
+        run: |
+          default_path="store/${{ vars.APP_ID }}/installations.json"
+          echo "INSTALLATIONS_PATH=${{inputs.installations_path || vars.INSTALLATIONS_PATH || $default_path }}" >> "$GITHUB_ENV"
+          echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
+      - name: extract repositories path
+        id: path
+        continue-on-error: true         
+        run: |
+          default_repo_path="store/${{ vars.APP_ID }}/repositories.json"
+          echo "REPOSITORIES_PATH=${{inputs.repositories_path || vars.REPOSITORIES_PATH || $default_repo_path }}" >> "$GITHUB_ENV"
+          echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
-          JSON=$(cat ./${{inputs.installations_path}})
-          echo "::set-output name=matrix::${JSON//'%'/'%25'}"
+          JSON=$(cat ./${{env.INSTALLATIONS_PATH}})
+          echo installations=${JSON//'%'/'%25'}" > $GITHUB_STEP_SUMMARY
+          echo "matrix=$installations" >> "$GITHUB_OUTPUT" 
           
 
 
@@ -29,10 +47,16 @@ jobs:
       max-parallel: 1
       matrix:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
+    outputs:
+      repositories: ${{ env.repositories }}
+    env:
+      repositories: [ ]
     steps:
       - run: |
-          echo "${{toJson(matrix)}}" 
-          echo "${{matrix.value.id}}" 
+          echo "${{toJson(matrix.value)}}" 
+          echo "working on ${{matrix.value.id}}" > $GITHUB_STEP_SUMMARY 
+          echo INSTALLATION_REPO_PATH=${{env.REPOSITORIES_PATH}}/${{matrix.value.id}}.json >> "$GITHUB_ENV"
+          echo installation repo path is ${{env.INSTALLATION_REPO_PATH}} >> $GITHUB_STEP_SUMMARY
 
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
@@ -51,7 +75,7 @@ jobs:
           TOKEN: ${{ steps.generate_token.outputs.token }}
           AUTH: ${{ steps.generate_token.outputs.authorization }}
         run: |
-          echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"
+          echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"  > $GITHUB_STEP_SUMMARY 
      
       # This step installs Deno, which is a new Javascript runtime that improves on Node. 
       - name: Setup deno
@@ -66,6 +90,25 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url:  ${{ matrix.value.repositories_url}}
-          downloaded_filename: store/${{ vars.APP_ID }}/${{matrix.value.id}}.json
+          downloaded_filename: ${{env.INSTALLATION_REPO_PATH}}
           authorization: ${{ env.AUTH }}
+      
+          
     needs: [ setup ]
+    
+  
+#  # go over the repositories files and create an index.json file with array of all repositories
+#  index:
+#    runs-on: ubuntu-latest
+#    needs: [ scheduled ]
+#    env: 
+#      repositories: ${{fromJson(needs.scheduled.outputs.repositories)}}
+#      
+#    steps:
+#      - name: iterate repositories files and merge jsons
+#        run: |
+#          for file in ${{env.repositories}}; 
+#            do echo fromJson(cat $file); 
+#          done;
+
+    
