@@ -27,12 +27,13 @@ jobs:
           echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
-          JSON=$(cat ./${{env.INSTALLATIONS_PATH}})
-          echo installations=${JSON//'%'/'%25'}" > $GITHUB_STEP_SUMMARY
-          echo "matrix=$installations" >> "$GITHUB_OUTPUT" 
-          
-
-
+          JSON=$(cat ./${{env.INSTALLATIONS_PATH}}) > $GITHUB_STEP_SUMMARY
+          echo "JSON_RESPONSE<<$JSON" >> "$GITHUB_ENV"
+          installations=${{fromJSON(env.JSON_RESPONSE)}} > $GITHUB_STEP_SUMMARY
+          echo "matrix=$installations" >> "$GITHUB_OUTPUT"
+  
+  
+  
   scheduled:
     environment: flat-api-app
     runs-on: ubuntu-latest
