@@ -93,7 +93,6 @@ jobs:
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
         uses: githubocto/flat@v3
-        continue-on-error: true
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
