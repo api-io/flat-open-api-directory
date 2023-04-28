@@ -120,7 +120,7 @@ jobs:
           for file in $file_list;
             do
                 text=$(cat $file)
-                json=${{fromJSON(text)}} 
+                json=${{fromJSON($text)}} 
                 repositories+=$json.repositories
             done;
           echo "repositories=$repositories" >> $GITHUB_STEP_SUMMARY
