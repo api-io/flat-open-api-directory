@@ -1,5 +1,4 @@
 name: flat-installations
-environment: flat-api-app
 on:
   workflow_dispatch:
     inputs:
@@ -13,26 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-  env:
-    REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
-    INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
+    env:
+      REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
+      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
 
-  steps:
-    - uses: actions/checkout@v3
-    - name: extract installation path
-      id: path
-      run: |
-        echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
-    - name: extract repositories path
-      id: path
-      run: |
-        echo REPOSITORIES_PATH=${{env.REPOSITORIES_PATH}} >> "$GITHUB_ENV"
-        echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
-    - id: set-matrix
-      run: |
-        JSON=$(cat ./${{env.INSTALLATIONS_PATH}})
-        echo installations=${JSON//'%'/'%25'}" > $GITHUB_STEP_SUMMARY
-        echo "matrix=$installations" >> "$GITHUB_OUTPUT" 
+    steps:
+      - uses: actions/checkout@v3
+      - name: extract installation path
+        run: |
+          echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
+      - name: extract repositories path
+        run: |
+          echo REPOSITORIES_PATH=${{env.REPOSITORIES_PATH}} >> "$GITHUB_ENV"
+          echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
+      - id: set-matrix
+        run: |
+          JSON=$(cat ./${{env.INSTALLATIONS_PATH}})
+          echo installations=${JSON//'%'/'%25'}" > $GITHUB_STEP_SUMMARY
+          echo "matrix=$installations" >> "$GITHUB_OUTPUT" 
           
 
 
@@ -45,8 +42,6 @@ jobs:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
     outputs:
       repositories: ${{ env.repositories }}
-    env:
-      repositories: [ ]
     steps:
       - run: |
           echo "${{toJson(matrix.value)}}" 
