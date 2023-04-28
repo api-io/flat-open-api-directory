@@ -16,7 +16,7 @@ jobs:
     steps: # This workflow has 4 steps
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
   
     # Genarates github app token 
       - name: Generate token
