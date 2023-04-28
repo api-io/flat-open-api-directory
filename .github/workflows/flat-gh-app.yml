@@ -20,7 +20,7 @@ jobs:
     environment: flat-api-app
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
-      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || store/${{ vars.APP_ID }}/installations.json}}
+      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
 
     steps: 
       # This workflow has 4 steps
