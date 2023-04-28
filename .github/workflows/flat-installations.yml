@@ -30,7 +30,7 @@ jobs:
         id: path
         run: |
           echo REPOSITORIES_PATH=${{env.REPOSITORIES_PATH}} >> "$GITHUB_ENV"
-          echo i_file_format=${{env.REPOSITORIES_PATH}}\{0}.json >> "$GITHUB_OUTPUT"
+          echo i_file_format=${{env.REPOSITORIES_PATH}}/{0}.json >> "$GITHUB_OUTPUT"
           echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
@@ -49,6 +49,8 @@ jobs:
     outputs:
       repositories: ${{ env.repositories }}
     steps:
+      - uses: actions/checkout@v3
+
       - name: set installation repos file path
         run: |
           echo "INSTALLATION_REPO_PATH=${{format(needs.setup.outputs.i_file_format, matrix.value.id)}}" >> "$GITHUB_ENV"
