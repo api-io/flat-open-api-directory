@@ -46,10 +46,13 @@ jobs:
     outputs:
       repositories: ${{ env.repositories }}
     steps:
-      - run: |
-          echo "${{toJson(matrix.value)}}" 
+      - name: set installation repos file path
+        run: |
+          echo "INSTALLATION_REPO_PATH=${{env.REPOSITORIES_PATH}}/${{matrix.value.id}}.json" >> "$GITHUB_ENV"
+
+      - name: print logs
+        run: |
           echo "working on ${{matrix.value.id}}" > $GITHUB_STEP_SUMMARY 
-          echo INSTALLATION_REPO_PATH=${{env.REPOSITORIES_PATH}}/${{matrix.value.id}}.json >> "$GITHUB_ENV"
           echo installation repo path is ${{env.INSTALLATION_REPO_PATH}} >> $GITHUB_STEP_SUMMARY
 
       # The first step is to check out the repository so it can read the files inside of it and do other operations
@@ -80,6 +83,7 @@ jobs:
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
         uses: githubocto/flat@v3
+        continue-on-error: true
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
