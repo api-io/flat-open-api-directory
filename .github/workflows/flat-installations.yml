@@ -6,9 +6,6 @@ on:
       installations_path: 
         type: string
         description: installation json file URL
-env:
-  REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
-  INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
 jobs:
 
   setup:
@@ -16,18 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+  env:
+    REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
+    INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
 
     steps:
       - uses: actions/checkout@v3
       - name: extract installation path
         id: path
-        continue-on-error: true         
         run: |
           echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
       - name: extract repositories path
         id: path
-        continue-on-error: true         
         run: |
+          echo REPOSITORIES_PATH=${{env.REPOSITORIES_PATH}} >> "$GITHUB_ENV"
           echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
