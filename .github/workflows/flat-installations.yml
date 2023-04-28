@@ -17,6 +17,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       i_file_format: ${{ steps.path.outputs.i_file_format }}
+      repositories_dir: ${{ env.REPOSITORIES_PATH }}
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
@@ -50,7 +51,10 @@ jobs:
       repositories: ${{ env.repositories }}
     steps:
       - uses: actions/checkout@v3
-
+      - name: create directory if not exists
+        run: |
+          mkdir -p ${{needs.setup.outputs.repositories_dir}}
+          
       - name: set installation repos file path
         run: |
           echo "INSTALLATION_REPO_PATH=${{format(needs.setup.outputs.i_file_format, matrix.value.id)}}" >> "$GITHUB_ENV"
