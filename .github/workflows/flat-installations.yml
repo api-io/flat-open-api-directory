@@ -31,7 +31,7 @@ jobs:
           echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
-          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}) > $GITHUB_STEP_SUMMARY
+          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}) >> $GITHUB_STEP_SUMMARY
           echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
   
   
