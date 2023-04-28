@@ -12,6 +12,10 @@ on:
         description: installation json file URL
   schedule:
     - cron: '0 0 1 * *' # Run this workflow every month on the first day of the month
+    
+env:
+  REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || "store/${{ vars.APP_ID }}/repositories"}}
+  INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || "store/${{ vars.APP_ID }}/installations.json"}}
 
 jobs:
   scheduled:
@@ -24,8 +28,6 @@ jobs:
         id: path
         continue-on-error: true         
         run: |
-          default_path="store/${{ vars.APP_ID }}/installations.json"
-          echo "INSTALLATIONS_PATH=${{inputs.installations_path || vars.INSTALLATIONS_PATH || "$default_path" }}" >> "$GITHUB_ENV"
           echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
 
       - name: Check out repo
