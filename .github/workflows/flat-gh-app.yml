@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: flat-api-app
     env:
-      REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || "store/${{ vars.APP_ID }}/repositories"}}
-      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || "store/${{ vars.APP_ID }}/installations.json"}}
+      REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || store/${{ vars.APP_ID }}/repositories }}
+      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || store/${{ vars.APP_ID }}/installations.json}}
 
     steps: 
       # This workflow has 4 steps
