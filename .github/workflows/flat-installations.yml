@@ -47,14 +47,11 @@ jobs:
       max-parallel: 1
       matrix:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
-    outputs:
-      repositories: ${{ env.repositories }}
     steps:
-      - uses: actions/checkout@v3
-      - name: create directory if not exists
-        run: |
-          mkdir -p ${{needs.setup.outputs.repositories_dir}}
-          
+      # The first step is to check out the repository so it can read the files inside of it and do other operations
+      - name: Check out repo
+        uses: actions/checkout@v3
+        
       - name: set installation repos file path
         run: |
           echo "INSTALLATION_REPO_PATH=${{format(needs.setup.outputs.i_file_format, matrix.value.id)}}" >> "$GITHUB_ENV"
@@ -64,11 +61,7 @@ jobs:
           echo "working on ${{matrix.value.id}}" > $GITHUB_STEP_SUMMARY 
           echo installation repo path is ${{env.INSTALLATION_REPO_PATH}} >> $GITHUB_STEP_SUMMARY
 
-      # The first step is to check out the repository so it can read the files inside of it and do other operations
-      - name: Check out repo
-        uses: actions/checkout@v3
-  
-    # Genarates github app token 
+     # Generates github app token 
       - name: Generate token
         id: generate_token
         uses: api-io/github-app-jwt@v1.2.4
@@ -76,6 +69,7 @@ jobs:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           installation_id: ${{ matrix.value.id }}
+          
       - name: Print token
         env:
           TOKEN: ${{ steps.generate_token.outputs.token }}
@@ -88,6 +82,13 @@ jobs:
         uses: denoland/setup-deno@main
         with:
           deno-version: v1.x 
+          
+
+
+      - name: create directory if not exists
+        run: |
+          mkdir -p ${{needs.setup.outputs.repositories_dir}}
+
 
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
@@ -104,18 +105,24 @@ jobs:
     needs: [ setup ]
     
   
-#  # go over the repositories files and create an index.json file with array of all repositories
-#  index:
-#    runs-on: ubuntu-latest
-#    needs: [ scheduled ]
-#    env: 
-#      repositories: ${{fromJson(needs.scheduled.outputs.repositories)}}
-#      
-#    steps:
-#      - name: iterate repositories files and merge jsons
-#        run: |
-#          for file in ${{env.repositories}}; 
-#            do echo fromJson(cat $file); 
-#          done;
-
-    
+  # go over the repositories files in (needs.setup.outputs.repositories_dir) and create an index.json file with array of all repositories
+  index:
+    runs-on: ubuntu-latest
+    needs: [ setup, scheduled ] 
+    steps:
+      - name: iterate files in directory and merge jsons into index.json
+        run: |
+          echo "working on ${{needs.setup.outputs.repositories_dir}}" > $GITHUB_STEP_SUMMARY
+          file_list=$(ls ${{needs.setup.outputs.repositories_dir}}) 
+          echo "file_list=$file_list" >> $GITHUB_STEP_SUMMARY
+          index_file=${{needs.setup.outputs.repositories_dir}}/index.json 
+          echo $index_file >> $GITHUB_STEP_SUMMARY
+          repositories=()
+          for file in $file_list;
+            do
+                json=${{fromJSON(cat $file)}} 
+                
+                repositories+=$json.repositories
+            done;
+          echo "repositories=$repositories" >> $GITHUB_STEP_SUMMARY
+          echo "repositories=${{toJson(repositories)}}" > $index_file
