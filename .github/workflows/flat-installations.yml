@@ -1,5 +1,9 @@
 name: flat-installations
 on:
+  push:
+    paths:
+      - .github/workflows/flat-installations.yml # Only run a new workflow every time this file (flat.yaml) file changes
+      - store/installations.json
   workflow_dispatch:
     inputs:
       installations_path: 
