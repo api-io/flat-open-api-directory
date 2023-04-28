@@ -25,7 +25,7 @@ jobs:
         continue-on-error: true         
         run: |
           default_path="store/${{ vars.APP_ID }}/installations.json"
-          echo "INSTALLATIONS_PATH=${{inputs.installations_path || vars.INSTALLATIONS_PATH || $default_path }}" >> "$GITHUB_ENV"
+          echo "INSTALLATIONS_PATH=${{inputs.installations_path || vars.INSTALLATIONS_PATH || "$default_path" }}" >> "$GITHUB_ENV"
           echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
 
       - name: Check out repo
