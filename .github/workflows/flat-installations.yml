@@ -116,7 +116,7 @@ jobs:
         id: jq
         continue-on-error: true
         run: |
-          jq .repositories=${{matrix.value.repositories}} tmp/preinstall -c > tmp/install
+          jq '. + ${{matrix.value.repositories}}' tmp/preinstall -c > tmp/install
           
       - name: jq add
         id: jq2
