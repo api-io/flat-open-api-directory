@@ -112,7 +112,9 @@ jobs:
       - name: update installation data
         run: |
           echo "${{toJSON(matrix.value)}}"  > tmp/preinstall
-          
+          echo "tmp/preinstall is $(cat tmp/preinstall)" 
+      
+      
       - name: jq installation data
         run: |
           $(jq -c . < tmp/preinstall) > ${{env.INSTALLATION_DIR}}/installations.json
