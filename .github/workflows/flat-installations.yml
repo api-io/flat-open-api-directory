@@ -112,7 +112,7 @@ jobs:
         run: |
           echo "${{toJSON(matrix.value)}}" > tmp/preinstall
           cat tmp/preinstall
-          jq '. + $data[0]' ${{env.INSTALLATION_REPO_PATH}} --slurpfile data tmp/preinstall -c > tmp/install
+          jq -s add ${{env.INSTALLATION_REPO_PATH}} tmp/preinstall -c > tmp/install
            
       - name: update index
         run: |
