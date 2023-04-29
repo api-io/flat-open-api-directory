@@ -56,8 +56,8 @@ jobs:
         
       - name: set installation repos file path
         run: |
-          echo "INSTALLATION_REPO_PATH= installations/${{matrix.value.id) }}" >> "$GITHUB_ENV"
-          echo "INSTALLATION_DIR=${{format('{0}/{1}', needs.setup.outputs.installations_dir, matrix.value.id}}" >> "$GITHUB_ENV"
+          echo "INSTALLATION_REPO_PATH=store/installations/${{matrix.value.id}}/index.json" >> "$GITHUB_ENV"
+          echo "INSTALLATION_DIR=store/installations/${{matrix.value.id}}" >> "$GITHUB_ENV"
       - name: print logs
         run: |
           echo "working on ${{matrix.value.id}}" > $GITHUB_STEP_SUMMARY 
