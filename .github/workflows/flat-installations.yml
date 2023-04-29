@@ -93,6 +93,7 @@ jobs:
           mkdir -p ${{needs.setup.outputs.repositories_dir}}
           mkdir -p ${{needs.setup.outputs.installations_dir}}
           mkdir -p ${{env.INSTALLATION_DIR}}
+          mkdir -p tmp
 
 
 
@@ -109,18 +110,21 @@ jobs:
 #          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
       - name: update installation data
         run: |
-          echo ${{fromJSON(matrix.value)}} > $tmp_install
-          cat $tmp_install
-          jq add -s ${{env.INSTALLATION_REPO_PATH}} $tmp_install > $tmp
-          cat $tmp
-          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data $tmp > $tmp_index          
+          echo ${{fromJSON(matrix.value)}} > tmp/preinstall
+          jq add -s ${{env.INSTALLATION_REPO_PATH}} tmp/preinstall > tmp/install
+           
+      - name: update index
+        run: |
+          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data $tmp > tmp/index
+          
+      - name: move tmp files
+        run: |
           mv $tmp_index ${{needs.setup.outputs.index_file}}
           mv $tmp ${{env.INSTALLATION_REPO_PATH}}
           rm $tmp_install
           rm $tmp
-          echo $json >> $GITHUB_STEP_SUMMARY
-           
-          
+
+
       - name: echo logs
         run: |
           echo $(cat ${{env.INSTALLATION_REPO_PATH}}) >> $GITHUB_STEP_SUMMARY
