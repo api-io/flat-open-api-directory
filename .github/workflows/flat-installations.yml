@@ -111,7 +111,7 @@ jobs:
       - name: update installation data
         run: |
           echo ${{fromJSON(matrix.value)}} > tmp/preinstall
-          jq add -s ${{env.INSTALLATION_REPO_PATH}} tmp/preinstall > tmp/install
+          jq '. + $data[0]' ${{env.INSTALLATION_REPO_PATH} --slurpfile data tmp/preinstall > tmp/install
            
       - name: update index
         run: |
