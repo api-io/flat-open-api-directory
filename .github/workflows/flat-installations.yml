@@ -110,7 +110,7 @@ jobs:
 #          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
       - name: update installation data
         run: |
-          echo ${{toJSON(matrix.value)}} > tmp/preinstall
+          echo "${{toJSON(matrix.value)}}" > tmp/preinstall
           jq '. + $data[0]' ${{env.INSTALLATION_REPO_PATH}} --slurpfile data tmp/preinstall -c > tmp/install
            
       - name: update index
