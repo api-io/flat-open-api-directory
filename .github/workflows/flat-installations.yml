@@ -109,9 +109,6 @@ jobs:
 #          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
       - name: update installation data
         run: |
-          tmp=$(mktemp)
-          tmp_install=$(mktemp) 
-          tmp_index=$(mktemp) 
           echo ${{fromJSON(matrix.value)}} > $tmp_install
           cat $tmp_install
           jq add -s ${{env.INSTALLATION_REPO_PATH}} $tmp_install > $tmp
