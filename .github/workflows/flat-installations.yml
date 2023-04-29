@@ -111,13 +111,13 @@ jobs:
 #          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
       - name: update installation data
         run: |
-          jq -n -c  $(echo `${{toJSON(matrix.value)}}`")  > tmp/preinstall
-          echo ${{toJSON(matrix.value)}}  > ${{env.INSTALLATION_DIR}}/installations.json
+          echo ${{toJSON(matrix.value)}}  > tmp/preinstall
+          jq . -c -s  tmp/preinstall > ${{env.INSTALLATION_DIR}}/installations.json
       - name: jq -n
         id: jq
         continue-on-error: true
         run: |
-          jq -n ${{matrix.value}} | jq add -s -c $INSTALLATION_REPO_PATH  > tmp/install
+          jq -n ${{toJSON(matrix.value)}} | jq add -s -c $INSTALLATION_REPO_PATH  > tmp/install
           
       - name: jq add
         id: jq2
@@ -143,6 +143,7 @@ jobs:
         if: steps.jq3.outcome == 'failure'
         
       - name: update index
+        continue-on-error: true
         run: |
           jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data tmp/install -c > tmp/index
           
