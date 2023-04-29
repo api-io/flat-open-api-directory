@@ -18,10 +18,11 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       i_file_format: ${{ steps.path.outputs.i_file_format }}
       repositories_dir: ${{ env.REPOSITORIES_PATH }}
+      installations_dir: store/installations
+      index_file: ${{env.REPOSITORIES_PATH}}/index.json
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
-
     steps:
       - uses: actions/checkout@v3
       - name: extract installation path
@@ -33,6 +34,7 @@ jobs:
           echo REPOSITORIES_PATH=${{env.REPOSITORIES_PATH}} >> "$GITHUB_ENV"
           echo i_file_format=${{env.REPOSITORIES_PATH}}/{0}.json >> "$GITHUB_OUTPUT"
           echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
+          
       - id: set-matrix
         run: |
           JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}) >> $GITHUB_STEP_SUMMARY
@@ -55,11 +57,12 @@ jobs:
       - name: set installation repos file path
         run: |
           echo "INSTALLATION_REPO_PATH=${{format(needs.setup.outputs.i_file_format, matrix.value.id)}}" >> "$GITHUB_ENV"
-
+          echo "INSTALLATION_DIR=${{format('{0}/{1}', needs.setup.outputs.installations_dir, matrix.value.id}}" >> "$GITHUB_ENV"
       - name: print logs
         run: |
           echo "working on ${{matrix.value.id}}" > $GITHUB_STEP_SUMMARY 
           echo installation repo path is ${{env.INSTALLATION_REPO_PATH}} >> $GITHUB_STEP_SUMMARY
+          echo installation dir path is ${{env.INSTALLATION_DIR}} >> $GITHUB_STEP_SUMMARY
 
      # Generates github app token 
       - name: Generate token
@@ -88,6 +91,9 @@ jobs:
       - name: create directory if not exists
         run: |
           mkdir -p ${{needs.setup.outputs.repositories_dir}}
+          mkdir -p ${{needs.setup.outputs.installations_dir}}
+          mkdir -p ${{env.INSTALLATION_DIR}}
+
 
 
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
@@ -99,31 +105,62 @@ jobs:
           http_url:  ${{ matrix.value.repositories_url}}
           downloaded_filename: ${{env.INSTALLATION_REPO_PATH}}
           authorization: ${{ env.AUTH }}
-      
           
+#          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
+      - name: update installation data
+        run: |
+          tmp=$(mktemp)
+          tmp_install=$(mktemp) 
+          tmp_index=$(mktemp) 
+          echo ${{fromJSON(matrix.value)}} > $tmp_install
+          cat $tmp_install
+          jq add -s ${{env.INSTALLATION_REPO_PATH}} $tmp_install > $tmp
+          cat $tmp
+          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data $tmp > $tmp_index          
+          mv $tmp_index ${{needs.setup.outputs.index_file}}
+          mv $tmp ${{env.INSTALLATION_REPO_PATH}}
+          rm $tmp_install
+          rm $tmp
+          echo $json >> $GITHUB_STEP_SUMMARY
+           
+          
+      - name: echo logs
+        run: |
+          echo $(cat ${{env.INSTALLATION_REPO_PATH}}) >> $GITHUB_STEP_SUMMARY
+          echo $(cat ${{needs.setup.outputs.index_file}}) >> $GITHUB_STEP_SUMMARY
+          
+      - name: add files to git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add ${{env.INSTALLATION_REPO_PATH}}
+          git add ${{needs.setup.outputs.index_file}}
+          git commit -m "update installation data"
+          git push
+    
     needs: [ setup ]
     
   
   # go over the repositories files in (needs.setup.outputs.repositories_dir) and create an index.json file with array of all repositories
-  index:
-    runs-on: ubuntu-latest
-    needs: [ setup, scheduled ] 
-    steps:
-      - name: iterate files in directory and merge jsons into index.json
-        run: |
-          echo "working on ${{needs.setup.outputs.repositories_dir}}" > $GITHUB_STEP_SUMMARY
-          file_list=$(ls ${{needs.setup.outputs.repositories_dir}}) 
-          echo "file_list=$file_list" >> $GITHUB_STEP_SUMMARY
-          index_file=${{needs.setup.outputs.repositories_dir}}/index.json 
-          echo $index_file >> $GITHUB_STEP_SUMMARY
-          
-          repositories=()
-          for file in $file_list;
-            do
-                text=`cat $file`
-                json=`echo $(jq -r '.repositories' <<< "$text")`
-                repositories+=json
-            done;
-          echo "repositories=$repositories" >> "$GITHUB_OUTPUT"
-          echo "$repositories" > "$index_file"
+#  index:
+#    runs-on: ubuntu-latest
+#    needs: [ setup, scheduled ] 
+#    steps:
+#      - name: iterate files in directory and merge jsons into index.json
+#        run: |
+#          echo "working on ${{needs.setup.outputs.repositories_dir}}" > $GITHUB_STEP_SUMMARY
+#          file_list=$(ls ${{needs.setup.outputs.repositories_dir}}) 
+#          echo "file_list=$file_list" >> $GITHUB_STEP_SUMMARY
+#          index_file=${{needs.setup.outputs.repositories_dir}}/index.json 
+#          echo $index_file >> $GITHUB_STEP_SUMMARY
+#          
+#          repositories=()
+#          for file in $file_list;
+#            do
+#                text=`cat $file`
+#                json=`echo $(jq -r '.repositories' <<< "$text")`
+#                repositories+=json
+#            done;
+#          echo "repositories=$repositories" >> "$GITHUB_OUTPUT"
+#          echo "$repositories" > "$index_file"
 
