@@ -111,11 +111,11 @@ jobs:
       - name: update installation data
         run: |
           echo ${{fromJSON(matrix.value)}} > tmp/preinstall
-          jq '. + $data[0]' ${{env.INSTALLATION_REPO_PATH} --slurpfile data tmp/preinstall > tmp/install
+          jq '. + $data[0]' ${{env.INSTALLATION_REPO_PATH}} --slurpfile data tmp/preinstall -c > tmp/install
            
       - name: update index
         run: |
-          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data tmp/install > tmp/index
+          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data tmp/install -c > tmp/index
           
       - name: move tmp files
         run: |
