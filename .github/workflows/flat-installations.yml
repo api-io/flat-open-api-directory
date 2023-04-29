@@ -56,7 +56,7 @@ jobs:
         
       - name: set installation repos file path
         run: |
-          echo "INSTALLATION_REPO_PATH=store/installations/${{matrix.value.id}}/index.json" >> "$GITHUB_ENV"
+          echo "INSTALLATION_REPO_PATH=store/installations/${{matrix.value.id}}/repos.json" >> "$GITHUB_ENV"
           echo "INSTALLATION_DIR=store/installations/${{matrix.value.id}}" >> "$GITHUB_ENV"
       - name: print logs
         run: |
@@ -94,6 +94,7 @@ jobs:
           mkdir -p ${{needs.setup.outputs.installations_dir}}
           mkdir -p ${{env.INSTALLATION_DIR}}
           mkdir -p tmp
+          
 
 
 
@@ -110,18 +111,19 @@ jobs:
 #          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
       - name: update installation data
         run: |
-          echo "${{toJSON(matrix.value)}}"  > tmp/preinstall
-          cat tmp/preinstall
-      - name: jq .repositories
+          jq -n ${{matrix.value}} -c 
+          jq -n ${{toJSON(matrix.value)}} -c 
+          jq -n ${{matrix.value}} -c  > tmp/preinstall
+          ${{toJSON(matrix.value)}}  > ${{env.INSTALLATION_DIR}}/installations.json
+      - name: jq -n
         id: jq
         continue-on-error: true
         run: |
-          jq '. + ${{matrix.value.repositories}}' tmp/preinstall -c > tmp/install
+          jq -n ${{matrix.value}} | jq add -s -c $INSTALLATION_REPO_PATH  > tmp/install
           
       - name: jq add
         id: jq2
-        continue-on-error: true
-
+        continue-on-error: true  
         run: |
           jq -s add ${{env.INSTALLATION_REPO_PATH}} tmp/preinstall -c > tmp/install
         if: steps.jq.outcome == 'failure'
@@ -132,13 +134,14 @@ jobs:
         continue-on-error: true
 
         run: |
-          jq '. + $data[0]'  tmp/preinstall  -c --slurpfile data ${{env.INSTALLATION_REPO_PATH}}> tmp/install
+          jq '. * input' $INSTALLATION_REPO_PATH tmp/preinstall >  ${{env.INSTALLATION_DIR}}/index.json
         if: steps.jq2.outcome == 'failure'
 
       - name: copy
         id: jq4
+        continue-on-error: true
         run: |
-          cat tmp/preinstall > tmp/install
+          jq '. * input' $INSTALLATION_REPO_PATH ${{env.INSTALLATION_DIR}}/installations.json >  ${{env.INSTALLATION_DIR}}/index.json
         if: steps.jq3.outcome == 'failure'
         
       - name: update index
