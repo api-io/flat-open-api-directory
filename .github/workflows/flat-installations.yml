@@ -115,7 +115,7 @@ jobs:
            
       - name: update index
         run: |
-          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data $tmp > tmp/index
+          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data tmp/install > tmp/index
           
       - name: move tmp files
         run: |
