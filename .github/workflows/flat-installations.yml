@@ -18,11 +18,19 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       installations_dir: ${{ env.INSTALLATIONS_PATH }}
       index_file: ${{env.INSTALLATIONS_PATH}}/index.jsonl
+      branch: ${{env.BRANCH}}
     env:
       REPOSITORIES_PATH: ${{ vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
+      BRANCH: flat/${{github.run_id}}
     steps:
       - uses: actions/checkout@v3
+      - name: checkout temporary branch
+        run: |
+          git checkout -b flat/${{github.run_id}} 
+          git tag flat -m "initiate flat run"
+          git push --set-upstream origin flat/${{github.run_id}}
+           
       - name: extract installation path
         run: |
       - name: logs
@@ -40,7 +48,7 @@ jobs:
           rm -rf  ${{ env.INSTALLATIONS_PATH }}/*
           mkdir -p ${{env.INSTALLATIONS_PATH}}/tmp
           touch ${{env.INSTALLATIONS_PATH}}/index.jsonl
-  
+    
   
   scheduled:
     environment: flat-api-app
@@ -53,7 +61,13 @@ jobs:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
         uses: actions/checkout@v3
-        
+      - name: checkout temporary branch
+        run: |
+          echo "branch=flat/${{matrix.value.id}}/${{github.run_id}}"
+          git checkout -b $branch
+          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
+          git push --set-upstream origin $branch
+      
       - name: set installation repos file path
         run: |
           INSTALLATION_DIR="${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}" 
@@ -91,6 +105,9 @@ jobs:
         run: |
           mkdir -p ${{env.INSTALLATION_DIR}}
           
+      - name: update installation data
+        run: |
+          jq -n -c '${{toJSON(matrix.value)}}'  > ${{env.INSTALLATION_PATH}}
 
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
@@ -102,9 +119,6 @@ jobs:
           downloaded_filename: ${{env.INSTALLATION_REPO_PATH}}
           authorization: ${{ env.AUTH }}
           
-      - name: update installation data
-        run: |
-          jq -n -c '${{toJSON(matrix.value)}}'  > ${{env.INSTALLATION_PATH}}
 
       - name: merge installation with repositories
         id: jq
@@ -133,8 +147,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add ${{env.INSTALLATION_DIR}}/*
-          git commit -m "update installation data"
-          git push
+          git commit --amend
     
     needs: [ setup ]
     
@@ -147,6 +160,13 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add ${{needs.setup.outputs.index_file}}
+          git --amend
+          git push -f
+          
+      - name: open PR to main
+        run: |
+            gh pr create --fill --base main --label flat
+          
   # go over the repositories files in (needs.setup.outputs.repositories_dir) and create an index.json file with array of all repositories
 #  index:
 #    runs-on: ubuntu-latest
