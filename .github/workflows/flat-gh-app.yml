@@ -56,7 +56,7 @@ jobs:
           deno-version: v1.x 
 
       # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
-      - name: Fetch data 
+      - name: Fetch installations 
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
@@ -64,3 +64,19 @@ jobs:
           http_url: https://api.github.com/app/installations
           downloaded_filename: ${{env.INSTALLATIONS_PATH}}/index.json
           authorization: ${{ env.AUTH }}
+      
+      - name: create github issue for each installation
+        run: |
+          gh issue create --title "installation syncing ${{ matrix.value.account.login }}" --body "${{toJSON(matrix.value)}}" --label "flat-installation" --assignee "flat-github-app[bot]" 
+        env:
+          GH_TOKEN:  ${{ github.token }}
+#      - name: create or update repositories for each installation
+#        uses: githubocto/flat@v3
+#        env:
+#          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+#        with:
+#          http_url: https://api.github.com/app/installations/${{ matrix.value.id }}/repositories
+#          downloaded_filename: ${{env.INSTALLATIONS_PATH}}/${{ matrix.value.id }}/repositories.json
+#          authorization: ${{ env.AUTH }}
+#          matrix:
+#            value: ${{ fromJson(readFileSync(${{env.INSTALLATIONS_PATH}}/index.json)) }}
