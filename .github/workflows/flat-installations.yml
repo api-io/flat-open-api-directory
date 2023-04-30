@@ -35,7 +35,7 @@ jobs:
           branch=flat/runs/installations/${{github.run_id}}
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
           git checkout -b $branch
-          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
+          git tag flat:installation:init flat:installation:${{matrix.value.id}} -m "initiate flat installation ${{matrix.value.id}}"
           git push --set-upstream origin $branch
       
       - name: extract installation path
@@ -70,7 +70,8 @@ jobs:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
     env:
       INSTALLATION_DIR: ${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}
-      BRANCH: ${{needs.setup.outputs.branch}}
+      BRANCH: ${{needs.setup.outputs.branch}}/${{matrix.value.id}}
+      BASE: ${{needs.setup.outputs.branch}}
       
     steps:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
@@ -86,7 +87,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           branch=flat/${{matrix.value.id}}/${{github.run_id}}
           git checkout -b $branch
-          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
+          git tag flat:init -m "initiate flat installation ${{matrix.value.id}}"
           git push --set-upstream origin $branch
       
       - name: set installation repos file path
@@ -146,6 +147,7 @@ jobs:
         id: jq
         run: |
           jq -s -c add ${{env.REPOS_FILE}} ${{env.META_FILE}} > ${{env.INSTALLATION_FILE}}
+          
 
 
       - name: update application index
@@ -159,9 +161,9 @@ jobs:
       - name: add files to git
         run: |
           git add ${{env.INSTALLATION_DIR}}/*
-          git commit --amend --no-edit
+          git commit --amend --no-edit --tag flat:installation:done 
           git push -f
-          gh pr create --fill --base ${{env.BRANCH}} --head HEAD --label flat "inst(${{ matrix.value.id }})"  >> $GITHUB_STEP_SUMMARY
+          gh pr create --fill --base ${{env.BRANCH}} --head HEAD --label flat   >> $GITHUB_STEP_SUMMARY
     needs: [ setup ]
     
   index:
