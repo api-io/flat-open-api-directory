@@ -115,8 +115,7 @@ jobs:
 #          echo "tmp/install is $(cat tmp/install)" 
 
       - name: jq add
-        id: jq2
-        continue-on-error: true  
+        id: jq
         run: |
           jq -s -c add ${{env.INSTALLATION_REPO_PATH}} ${{env.INSTALLATION_PATH}} > ${{env.INDEX_PATH}}
 
