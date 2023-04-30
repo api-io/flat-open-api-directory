@@ -30,7 +30,6 @@ jobs:
       - name: checkout temporary branch
         id: git
         run: |
-#          cd main
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           branch=flat/runs/installations/${{github.run_id}}
