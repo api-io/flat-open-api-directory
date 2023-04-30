@@ -1,5 +1,5 @@
 
-name: flat-gh-app
+name: scraping app installations
 
 on:
   push:
@@ -15,16 +15,18 @@ on:
     
 
 jobs:
-  scheduled:
+  app:
     runs-on: ubuntu-latest
     environment: flat-api-app
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
-
+     
+    outputs:
+      auth: ${{ steps.generate_token.outputs.authorization }}
+      installations: $(cat ${{env.INSTALLATIONS_PATH})
+      
     steps: 
-      # This workflow has 4 steps
-      # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: extract installation path
         id: path
         continue-on-error: true         
@@ -34,7 +36,6 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v3
   
-    # Genarates github app token 
       - name: Generate token
         id: generate_token
         uses: api-io/github-app-jwt@v1.2.3
@@ -49,7 +50,6 @@ jobs:
         run: |
           echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"
      
-      # This step installs Deno, which is a new Javascript runtime that improves on Node. 
       - name: Setup deno
         uses: denoland/setup-deno@main
         with:
@@ -61,22 +61,48 @@ jobs:
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
-          http_url: https://api.github.com/app/installations
+          http_url: ${{github.api_url}}/app/installations
           downloaded_filename: ${{env.INSTALLATIONS_PATH}}/index.json
           authorization: ${{ env.AUTH }}
-      
-      - name: create github issue for each installation
-        run: |
-          gh issue create --title "installation syncing ${{ matrix.value.account.login }}" --body "${{toJSON(matrix.value)}}" --label "flat-installation" --assignee "flat-github-app[bot]" 
-        env:
-          GH_TOKEN:  ${{ github.token }}
-#      - name: create or update repositories for each installation
-#        uses: githubocto/flat@v3
-#        env:
-#          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+          postprocess: .github/workflows/flat/app.ts
+  
+  installation:
+    needs: app
+    runs-on: ubuntu-latest
+    matrix:
+      value: ${{fromJson(needs.app.outputs.installations)}}
+
+    environment: ${{needs.app.outputs.environment}}
+      # Generates installation token for each installation 
+    steps:
+#      - name: Generate token
+#        id: generate_token
+#        run: githubocto/flat@v3
 #        with:
-#          http_url: https://api.github.com/app/installations/${{ matrix.value.id }}/repositories
-#          downloaded_filename: ${{env.INSTALLATIONS_PATH}}/${{ matrix.value.id }}/repositories.json
-#          authorization: ${{ env.AUTH }}
-#          matrix:
-#            value: ${{ fromJson(readFileSync(${{env.INSTALLATIONS_PATH}}/index.json)) }}
+#          http_url: matrix.value.access_tokens_url
+#          authorization: ${{ steps.app.outputs.auth }}
+#          postprocess: .github/workflows/flat/token.ts
+#          download_filename: tmp/${{ matrix.value.id }}/token.json
+      
+      - name: create access token for installation using gh api
+        id: create_token
+        run: |
+          gh auth login --with-token  <<< ${{ steps.generate_token.outputs.authorization }}
+          token=$(gh api -X POST /app/installations/${{ matrix.value.id }}/access_tokens -q .token) >> $GITHUB_OUTPUT
+#      - name: create installation token
+#        id: generate_token
+#        uses: api-io/github-app-jwt@v1.2.4
+#        with:
+#          app_id: ${{ vars.APP_ID }}
+#          private_key: ${{ secrets.PRIVATE_KEY }}
+#          installation_id: ${{ matrix.value.id }}
+      
+      
+      - name: create or update repositories for each installation
+        uses: githubocto/flat@v3
+        env:
+          AUTH: Bearer ${{ steps.generate_token.outputs.token }}
+        with:
+          http_url: ${{ matrix.value.repositories_url}}
+          downloaded_filename: ${{env.INSTALLATIONS_PATH}}/${{ matrix.value.id }}/repositories.json
+          authorization: ${{ env.AUTH }}
