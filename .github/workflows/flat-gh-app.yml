@@ -24,7 +24,7 @@ jobs:
      
     outputs:
       auth: ${{ steps.generate_token.outputs.authorization }}
-      installations: $(cat ${{env.INSTALLATIONS_PATH})
+      installations: $(cat ${{env.INSTALLATIONS_PATH}})
       
     steps: 
       - name: extract installation path
