@@ -18,11 +18,10 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       installations_dir: ${{ env.INSTALLATIONS_PATH }}
       index_file: ${{env.INSTALLATIONS_PATH}}/index.jsonl
-      branch: ${{env.BRANCH}}
+      branch: ${{steps.git.outputs.branch}}
     env:
       REPOSITORIES_PATH: ${{ vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
-      BRANCH: ${{steps.git.outputs.branch}}
     steps:
       - uses: actions/checkout@v3
       - name: checkout temporary branch
@@ -155,6 +154,7 @@ jobs:
         run: |
           git add ${{env.INSTALLATION_DIR}}/*
           git commit --amend --no-edit
+          git push -f
           gh pr create --fill --base origin/${{env.BRANCH}} --head HEAD --label flat >> $GITHUB_STEP_SUMMARY
     needs: [ setup ]
     
