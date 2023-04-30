@@ -78,16 +78,15 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v3
         with:
-          ref: ${{env.BRANCH}}
+          ref: ${{env.BASE}}
 #          path: ${{env.INSTALLATION_DIR}}
 
       - name: checkout temporary installation branch
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          branch=flat/${{matrix.value.id}}/${{github.run_id}}
+          branch=${{env.BRANCH}}
           git checkout -b $branch
-          git tag flat:init -m "initiate flat installation ${{matrix.value.id}}"
           git push --set-upstream origin $branch
       
       - name: set installation repos file path
@@ -163,7 +162,7 @@ jobs:
           git add ${{env.INSTALLATION_DIR}}/*
           git commit --amend --no-edit 
           git push -f -t
-          gh pr create --fill --base ${{env.BRANCH}} --head HEAD --label flat   >> $GITHUB_STEP_SUMMARY
+          gh pr create --fill --base ${{env.BRANCH}} --head ${{env.BASE}} --label flat   >> $GITHUB_STEP_SUMMARY
     needs: [ setup ]
     
   index:
