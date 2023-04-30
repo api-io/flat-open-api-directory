@@ -52,6 +52,9 @@ jobs:
       max-parallel: 1
       matrix:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
+    env:
+      INSTALLATION_DIR="${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}"
+      
     steps:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
@@ -67,19 +70,17 @@ jobs:
       
       - name: set installation repos file path
         run: |
-          INSTALLATION_DIR="${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}" 
-          echo "INSTALLATION_DIR=$INSTALLATION_DIR" >> "$GITHUB_ENV"
-          echo "INSTALLATION_REPO_PATH=$INSTALLATION_DIR/repos.json" >> "$GITHUB_ENV"
-          echo "INSTALLATION_PATH=$INSTALLATION_DIR/installation.json" >> "$GITHUB_ENV"
+          echo "REPOS_FILE=$INSTALLATION_DIR/repos.json" >> "$GITHUB_ENV"
+          echo "META_FILE=$INSTALLATION_DIR/installation.json" >> "$GITHUB_ENV"
           echo "INDEX_PATH=$INSTALLATION_DIR/index.json" >> "$GITHUB_ENV"
    
       - name: print logs
         run: |
           echo "working on ${{matrix.value.id}}" > $GITHUB_STEP_SUMMARY 
-          echo installation repo path is ${{env.INSTALLATION_REPO_PATH}} >> $GITHUB_STEP_SUMMARY
+          echo installation repo path is ${{env.REPOS_FILE}} >> $GITHUB_STEP_SUMMARY
           echo installation dir path is ${{env.INSTALLATION_DIR}} >> $GITHUB_STEP_SUMMARY
-          echo installation path is ${{env.INSTALLATION_PATH}} >> $GITHUB_STEP_SUMMARY
-          echo index path is ${{env.INDEX_PATH}} >> $GITHUB_STEP_SUMMARY
+          echo installation path is ${{env.META_FILE}} >> $GITHUB_STEP_SUMMARY
+          echo index path is ${{env.INSTALLATION_FILE}} >> $GITHUB_STEP_SUMMARY
 
      # Generates github app token 
       - name: Generate token
@@ -104,7 +105,7 @@ jobs:
           
       - name: update installation data
         run: |
-          jq -n -c '${{toJSON(matrix.value)}}'  > ${{env.INSTALLATION_PATH}}
+          jq -n -c '${{toJSON(matrix.value)}}'  > ${{env.META_FILE}}
 
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
@@ -113,24 +114,24 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url:  ${{ matrix.value.repositories_url}}
-          downloaded_filename: ${{env.INSTALLATION_REPO_PATH}}
+          downloaded_filename: ${{env.REPOS_FILE}}
           authorization: ${{ env.AUTH }}
           
 
       - name: merge installation with repositories
         id: jq
         run: |
-          jq -s -c add ${{env.INSTALLATION_REPO_PATH}} ${{env.INSTALLATION_PATH}} > ${{env.INDEX_PATH}}
+          jq -s -c add ${{env.REPOS_FILE}} ${{env.META_FILE}} > ${{env.INSTALLATION_FILE}}
 
 
       - name: update global index
         run: |
-          cat ${{env.INDEX_PATH}} >> ${{needs.setup.outputs.index_file}}
+          cat ${{env.INSTALLATION_FILE}} >> ${{needs.setup.outputs.index_file}}
       
 #      - name: move tmp files
 #        run: |
 #          mv $tmp_index ${{needs.setup.outputs.index_file}}
-#          mv $tmp ${{env.INSTALLATION_REPO_PATH}}
+#          mv $tmp ${{env.REPOS_FILE}}
 #          rm $tmp_install
 #          rm $tmp
 
