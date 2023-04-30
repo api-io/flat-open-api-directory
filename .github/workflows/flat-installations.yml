@@ -119,8 +119,9 @@ jobs:
         id: jq
         continue-on-error: true
         run: |
-          jq -n ${{toJSON(matrix.value)}} | jq add -s -c $INSTALLATION_REPO_PATH  > tmp/install
-          
+          jq add -s -c '${{toJSON(matrix.value)}}'  $INSTALLATION_REPO_PATH  > tmp/install
+          echo "tmp/install is $(cat tmp/install)" 
+
       - name: jq add
         id: jq2
         continue-on-error: true  
