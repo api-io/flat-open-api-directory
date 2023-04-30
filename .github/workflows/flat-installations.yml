@@ -25,7 +25,15 @@ jobs:
       BRANCH: flat/${{github.run_id}}
     steps:
       - uses: actions/checkout@v3
-           
+      - name: checkout temporary branch
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          echo "branch=flat/runs/installations/${{github.run_id}}"
+          git checkout -b $branch
+          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
+          git push --set-upstream origin $branch
+      
       - name: extract installation path
         run: |
       - name: logs
@@ -53,20 +61,20 @@ jobs:
       matrix:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
     env:
-      INSTALLATION_DIR="${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}"
+      INSTALLATION_DIR: ${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}
       
     steps:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
       - name: Check out repo
         uses: actions/checkout@v3
-      - name: checkout temporary branch
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          echo "branch=flat/${{matrix.value.id}}/${{github.run_id}}"
-          git checkout -b $branch
-          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
-          git push --set-upstream origin $branch
+#      - name: checkout temporary branch
+#        run: |
+#          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+#          git config --global user.name "github-actions[bot]"
+#          echo "branch=flat/${{matrix.value.id}}/${{github.run_id}}"
+#          git checkout -b $branch
+#          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
+#          git push --set-upstream origin $branch
       
       - name: set installation repos file path
         run: |
@@ -142,8 +150,6 @@ jobs:
           
       - name: add files to git
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
           git add ${{env.INSTALLATION_DIR}}/*
           git commit --amend
     
