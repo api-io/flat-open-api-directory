@@ -28,17 +28,18 @@ jobs:
       - name: logs
         run: |
           echo installations store ${{ env.INSTALLATIONS_PATH }} >> $GITHUB_STEP_SUMMARY
-     
+      
+      - id: set-matrix
+        run: |
+          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}/index.json)
+          echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
+
       - name: create or clean directories
         run: |
           mkdir -p  ${{ env.INSTALLATIONS_PATH }}
           rm -rf  ${{ env.INSTALLATIONS_PATH }}/*
           mkdir -p ${{env.INSTALLATIONS_PATH}}/tmp
           touch ${{env.INSTALLATIONS_PATH}}/index.jsonl
-      - id: set-matrix
-        run: |
-          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}/index.json)
-          echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
   
   
   scheduled:
