@@ -35,7 +35,7 @@ jobs:
           branch=flat/runs/installations/${{github.run_id}}
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
           git checkout -b $branch
-          git tag flat:installation:init flat:installation:${{matrix.value.id}} -m "initiate flat installation ${{matrix.value.id}}"
+          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
           git push --set-upstream origin $branch
       
       - name: extract installation path
@@ -161,8 +161,8 @@ jobs:
       - name: add files to git
         run: |
           git add ${{env.INSTALLATION_DIR}}/*
-          git commit --amend --no-edit --tag flat:installation:done 
-          git push -f
+          git commit --amend --no-edit 
+          git push -f -t
           gh pr create --fill --base ${{env.BRANCH}} --head HEAD --label flat   >> $GITHUB_STEP_SUMMARY
     needs: [ setup ]
     
@@ -180,27 +180,4 @@ jobs:
         run: |
             gh pr create --fill --base main --label flat >> $GITHUB_STEP_SUMMARY
             
-          
-  # go over the repositories files in (needs.setup.outputs.repositories_dir) and create an index.json file with array of all repositories
-#  index:
-#    runs-on: ubuntu-latest
-#    needs: [ setup, scheduled ] 
-#    steps:
-#      - name: iterate files in directory and merge jsons into index.json
-#        run: |
-#          echo "working on ${{needs.setup.outputs.repositories_dir}}" > $GITHUB_STEP_SUMMARY
-#          file_list=$(ls ${{needs.setup.outputs.repositories_dir}}) 
-#          echo "file_list=$file_list" >> $GITHUB_STEP_SUMMARY
-#          index_file=${{needs.setup.outputs.repositories_dir}}/index.json 
-#          echo $index_file >> $GITHUB_STEP_SUMMARY
-#          
-#          repositories=()
-#          for file in $file_list;
-#            do
-#                text=`cat $file`
-#                json=`echo $(jq -r '.repositories' <<< "$text")`
-#                repositories+=json
-#            done;
-#          echo "repositories=$repositories" >> "$GITHUB_OUTPUT"
-#          echo "$repositories" > "$index_file"
-
+       
