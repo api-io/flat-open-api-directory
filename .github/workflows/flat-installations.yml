@@ -24,6 +24,8 @@ jobs:
       INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
     steps:
       - uses: actions/checkout@v3
+        path: main
+        
       - name: checkout temporary branch
         id: git
         run: |
@@ -52,7 +54,7 @@ jobs:
           rm -rf  ${{ env.INSTALLATIONS_PATH }}/*
           mkdir -p ${{env.INSTALLATIONS_PATH}}/tmp
           touch ${{env.INSTALLATIONS_PATH}}/index.jsonl
-    
+          
   
   scheduled:
     environment: flat-api-app
@@ -67,21 +69,20 @@ jobs:
       
     steps:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
-#      - name: Check out repo
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{env.BRANCH}}
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          path: ${{env.INSTALLATION_DIR}}
-#          
-#      - name: checkout temporary branch
-#        run: |
-#          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-#          git config --global user.name "github-actions[bot]"
-#          branch=flat/${{matrix.value.id}}/${{github.run_id}}
-#          git checkout -b $branch
-#          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
-#          git push --set-upstream origin $branch
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{env.BRANCH}}
+          path: ${{env.INSTALLATION_DIR}}
+
+      - name: checkout temporary installation branch
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          branch=flat/${{matrix.value.id}}/${{github.run_id}}
+          git checkout -b $branch
+          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
+          git push --set-upstream origin $branch
       
       - name: set installation repos file path
         run: |
@@ -155,7 +156,7 @@ jobs:
           git add ${{env.INSTALLATION_DIR}}/*
           git commit --amend --no-edit
           git push -f
-          gh pr create --fill --base origin/${{env.BRANCH}} --head HEAD --label flat >> $GITHUB_STEP_SUMMARY
+          gh pr create --fill --base ${{env.BRANCH}} --head HEAD --label flat "inst(${{ matrix.value.id }})"  >> $GITHUB_STEP_SUMMARY
     needs: [ setup ]
     
   index:
