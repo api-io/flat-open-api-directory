@@ -22,14 +22,16 @@ jobs:
     env:
       REPOSITORIES_PATH: ${{ vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
-      BRANCH: flat/${{github.run_id}}
+      BRANCH: ${{steps.git.outputs.branch}}
     steps:
       - uses: actions/checkout@v3
       - name: checkout temporary branch
+        id: git
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           branch=flat/runs/installations/${{github.run_id}}
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
           git checkout -b $branch
           git tag flat -m "initiate flat installation ${{matrix.value.id}}"
           git push --set-upstream origin $branch
@@ -62,16 +64,22 @@ jobs:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
     env:
       INSTALLATION_DIR: ${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}
+      BRANCH: ${{needs.setup.outputs.index_file}}
       
     steps:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
-      - name: Check out repo
-        uses: actions/checkout@v3
+#      - name: Check out repo
+#        uses: actions/checkout@v3
+#        with:
+#          ref: ${{env.BRANCH}}
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          path: ${{env.INSTALLATION_DIR}}
+#          
 #      - name: checkout temporary branch
 #        run: |
 #          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 #          git config --global user.name "github-actions[bot]"
-#          echo "branch=flat/${{matrix.value.id}}/${{github.run_id}}"
+#          branch=flat/${{matrix.value.id}}/${{github.run_id}}
 #          git checkout -b $branch
 #          git tag flat -m "initiate flat installation ${{matrix.value.id}}"
 #          git push --set-upstream origin $branch
@@ -110,6 +118,7 @@ jobs:
       - name: create directory if not exists
         run: |
           mkdir -p ${{env.INSTALLATION_DIR}}
+          rm -rf ${{env.INSTALLATION_DIR}}/*
           touch ${{env.INSTALLATION_FILE}}
       
       
@@ -146,7 +155,7 @@ jobs:
         run: |
           git add ${{env.INSTALLATION_DIR}}/*
           git commit --amend --no-edit
-    
+          gh pr create --fill --base origin/${{env.BRANCH}} --head HEAD --label flat >> $GITHUB_STEP_SUMMARY
     needs: [ setup ]
     
   index:
@@ -156,8 +165,8 @@ jobs:
       - name: add index file to git
         run: | 
           git add ${{needs.setup.outputs.index_file}}
-          git --amend
-          git push -f
+          git -m "update log file"
+          git push 
           
       - name: open PR to main
         run: |
