@@ -64,7 +64,7 @@ jobs:
         value: ${{fromJson(needs.setup.outputs.matrix)}}
     env:
       INSTALLATION_DIR: ${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}
-      BRANCH: ${{needs.setup.outputs.index_file}}
+      BRANCH: ${{needs.setup.outputs.branch}}
       
     steps:
       # The first step is to check out the repository so it can read the files inside of it and do other operations
@@ -166,7 +166,7 @@ jobs:
         run: | 
           git add ${{needs.setup.outputs.index_file}}
           git -m "update log file"
-          git push 
+          git push -f
           
       - name: open PR to main
         run: |
