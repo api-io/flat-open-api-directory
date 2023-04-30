@@ -31,10 +31,10 @@ jobs:
      
       - name: create or clean directories
         run: |
-          mkdir -p ${{needs.setup.outputs.installations_dir}}
-          rm -rf ${{needs.setup.outputs.installations_dir}}/*
-          mkdir -p ${{needs.setup.outputs.installations_dir}}/tmp
-          touch ${{needs.setup.outputs.installations_dir}}/index.jsonl
+          mkdir -p  ${{ env.INSTALLATIONS_PATH }}
+          rm -rf  ${{ env.INSTALLATIONS_PATH }}/*
+          mkdir -p ${{env.INSTALLATIONS_PATH}}/tmp
+          touch ${{env.INSTALLATIONS_PATH}}/index.jsonl
       - id: set-matrix
         run: |
           JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}/index.json)
