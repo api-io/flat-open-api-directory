@@ -16,30 +16,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-      i_file_format: ${{ steps.path.outputs.i_file_format }}
       repositories_dir: ${{ env.REPOSITORIES_PATH }}
-      installations_dir: store/installations
-      index_file: ${{env.REPOSITORIES_PATH}}/index.json
+      installations_dir: ${{ env.INSTALLATIONS_PATH }}
+      index_file: ${{ env.REPOSITORIES_PATH }}/index.json
     env:
-      REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
-      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
+      REPOSITORIES_PATH: ${{ vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
+      INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
     steps:
       - uses: actions/checkout@v3
       - name: extract installation path
         run: |
-          echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
-      - name: extract repositories path
-        id: path
+      - name: logs
         run: |
-          echo REPOSITORIES_PATH=${{env.REPOSITORIES_PATH}} >> "$GITHUB_ENV"
-          echo i_file_format=${{env.REPOSITORIES_PATH}}/{0}.json >> "$GITHUB_OUTPUT"
-          echo repositories path is ${{env.REPOSITORIES_PATH}} >> $GITHUB_STEP_SUMMARY
-          
+          echo installations path is ${{ env.INSTALLATIONS_PATH }} >> $GITHUB_STEP_SUMMARY
+          echo repositories path is ${{ env.REPOSITORIES_PATH }} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
-          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}) >> $GITHUB_STEP_SUMMARY
+          JSON_RESPONSE=$(cat ${{ env.INSTALLATIONS_PATH }})
           echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
-  
   
   
   scheduled:
@@ -56,15 +50,19 @@ jobs:
         
       - name: set installation repos file path
         run: |
-          echo "INSTALLATION_REPO_PATH=store/installations/${{matrix.value.id}}/repos.json" >> "$GITHUB_ENV"
-          echo "INSTALLATION_PATH=store/installations/${{matrix.value.id}}/installation.json" >> "$GITHUB_ENV"
-          echo "INDEX_PATH=store/installations/${{matrix.value.id}}/index.json" >> "$GITHUB_ENV"
-          echo "INSTALLATION_DIR=store/installations/${{matrix.value.id}}" >> "$GITHUB_ENV"
+          INSTALLATION_DIR="${{needs.setup.outputs.installations_dir}}/${{matrix.value.id}}" 
+          echo "INSTALLATION_DIR=$INSTALLATION_DIR" >> "$GITHUB_ENV"
+          echo "INSTALLATION_REPO_PATH=$INSTALLATION_DIR/repos.json" >> "$GITHUB_ENV"
+          echo "INSTALLATION_PATH=$INSTALLATION_DIR/installation.json" >> "$GITHUB_ENV"
+          echo "INDEX_PATH=$INSTALLATION_DIR/index.json" >> "$GITHUB_ENV"
+   
       - name: print logs
         run: |
           echo "working on ${{matrix.value.id}}" > $GITHUB_STEP_SUMMARY 
           echo installation repo path is ${{env.INSTALLATION_REPO_PATH}} >> $GITHUB_STEP_SUMMARY
           echo installation dir path is ${{env.INSTALLATION_DIR}} >> $GITHUB_STEP_SUMMARY
+          echo installation path is ${{env.INSTALLATION_PATH}} >> $GITHUB_STEP_SUMMARY
+          echo index path is ${{env.INDEX_PATH}} >> $GITHUB_STEP_SUMMARY
 
      # Generates github app token 
       - name: Generate token
@@ -74,13 +72,6 @@ jobs:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           installation_id: ${{ matrix.value.id }}
-          
-      - name: Print token
-        env:
-          TOKEN: ${{ steps.generate_token.outputs.token }}
-          AUTH: ${{ steps.generate_token.outputs.authorization }}
-        run: |
-          echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"  > $GITHUB_STEP_SUMMARY 
      
       # This step installs Deno, which is a new Javascript runtime that improves on Node. 
       - name: Setup deno
@@ -130,37 +121,37 @@ jobs:
           jq -s -c add ${{env.INSTALLATION_REPO_PATH}} ${{env.INSTALLATION_PATH}} > ${{env.INDEX_PATH}}
         if: steps.jq.outcome == 'failure'
 
-
-      - name: jq add
-        id: jq3
-        continue-on-error: true
-
-        run: |
-          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >   ${{env.INDEX_PATH}}
-        if: steps.jq2.outcome == 'failure'
-
-      - name: copy
-        id: jq4
-        continue-on-error: true
-        run: |
-          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >  ${{env.INDEX_PATH}}
-        if: steps.jq3.outcome == 'failure'
-        
-      - name: update index
-        continue-on-error: true
-        run: |
-          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data ${{env.INDEX_PATH}} -c > tmp/index
-     
+#
+#      - name: jq add
+#        id: jq3
+#        continue-on-error: true
+#
+#        run: |
+#          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >   ${{env.INDEX_PATH}}
+#        if: steps.jq2.outcome == 'failure'
+#
+#      - name: copy
+#        id: jq4
+#        continue-on-error: true
+#        run: |
+#          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >  ${{env.INDEX_PATH}}
+#        if: steps.jq3.outcome == 'failure'
+#        
+#      - name: update index
+#        continue-on-error: true
+#        run: |
+#          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data ${{env.INDEX_PATH}} -c > tmp/index
+#     
       - name: update tmp index
         run: |
           cat ${{env.INDEX_PATH}} >> tmp/index
       
-      - name: move tmp files
-        run: |
-          mv $tmp_index ${{needs.setup.outputs.index_file}}
-          mv $tmp ${{env.INSTALLATION_REPO_PATH}}
-          rm $tmp_install
-          rm $tmp
+#      - name: move tmp files
+#        run: |
+#          mv $tmp_index ${{needs.setup.outputs.index_file}}
+#          mv $tmp ${{env.INSTALLATION_REPO_PATH}}
+#          rm $tmp_install
+#          rm $tmp
 
 
       - name: echo logs
@@ -172,8 +163,7 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          git add ${{env.INSTALLATION_REPO_PATH}}
-          git add ${{needs.setup.outputs.index_file}}
+          git add ${{env.INSTALLATION_DIR}}/*
           git commit -m "update installation data"
           git push
     
