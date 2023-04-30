@@ -113,12 +113,7 @@ jobs:
         run: |
           jq -n -c '${{toJSON(matrix.value)}}'  > tmp/preinstall
           echo "tmp/preinstall is $(cat tmp/preinstall)" 
-      
-      
-      - name: jq installation data
-        run: |
-          $(jq -c . < tmp/preinstall) > ${{env.INSTALLATION_DIR}}/installations.json
-          echo "installation data is $(cat ${{env.INSTALLATION_DIR}}/installations.json)" 
+          cat tmp/preinstall > ${{env.INSTALLATION_DIR}}/installation.json
 
       - name: jq -n
         id: jq
