@@ -1,0 +1,66 @@
+
+name: flat-gh-app
+
+on:
+  push:
+    paths:
+      - .github/workflows/flat-gh-app.yml # Only run a new workflow every time this file (flat.yaml) file changes
+  workflow_dispatch:
+    inputs:
+      installations_path: 
+        type: string
+        description: installation json file URL
+  schedule:
+    - cron: '0 0 1 * *' # Run this workflow every month on the first day of the month
+    
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    environment: flat-api-app
+    env:
+      REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
+      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
+
+    steps: 
+      # This workflow has 4 steps
+      # The first step is to check out the repository so it can read the files inside of it and do other operations
+      - name: extract installation path
+        id: path
+        continue-on-error: true         
+        run: |
+          echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
+
+      - name: Check out repo
+        uses: actions/checkout@v3
+  
+    # Genarates github app token 
+      - name: Generate token
+        id: generate_token
+        uses: api-io/github-app-jwt@v1.2.3
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          
+      - name: Print token
+        env:
+          TOKEN: ${{ steps.generate_token.outputs.token }}
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+        run: |
+          echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"
+     
+      # This step installs Deno, which is a new Javascript runtime that improves on Node. 
+      - name: Setup deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: v1.x 
+
+      # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
+      - name: Fetch data 
+        uses: githubocto/flat@v3
+        env:
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+        with:
+          http_url: https://api.github.com/app/installations
+          downloaded_filename: ${{env.INSTALLATIONS_PATH}}/index.json
+          authorization: ${{ env.AUTH }}
