@@ -25,6 +25,7 @@ jobs:
     outputs:
       auth: ${{ steps.generate_token.outputs.authorization }}
       installations: $(cat ${{env.INSTALLATIONS_PATH}})
+      environment: flat-api-app
       
     steps: 
       - name: extract installation path
@@ -69,8 +70,10 @@ jobs:
   installation:
     needs: app
     runs-on: ubuntu-latest
-    matrix:
-      value: ${{fromJson(needs.app.outputs.installations)}}
+    strategy:
+      max-parallel: 1
+      matrix:
+        value: ${{fromJson(needs.app.outputs.installations)}}
 
     environment: ${{needs.app.outputs.environment}}
       # Generates installation token for each installation 
@@ -106,3 +109,4 @@ jobs:
           http_url: ${{ matrix.value.repositories_url}}
           downloaded_filename: ${{env.INSTALLATIONS_PATH}}/${{ matrix.value.id }}/repositories.json
           authorization: ${{ env.AUTH }}
+          postprocess: .github/workflows/flat/installation.ts
