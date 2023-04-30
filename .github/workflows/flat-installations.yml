@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - .github/workflows/flat-installations.yml # Only run a new workflow every time this file (flat.yaml) file changes
-      - store/installations.json
+      - store/installations/index.json
   workflow_dispatch:
     inputs:
       installations_path: 
@@ -32,7 +32,7 @@ jobs:
           echo repositories path is ${{ env.REPOSITORIES_PATH }} >> $GITHUB_STEP_SUMMARY
       - id: set-matrix
         run: |
-          JSON_RESPONSE=$(cat ${{ env.INSTALLATIONS_PATH }})
+          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}/index.json)
           echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
   
   

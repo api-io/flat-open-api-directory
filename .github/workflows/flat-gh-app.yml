@@ -62,5 +62,5 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: https://api.github.com/app/installations
-          downloaded_filename: ${{env.INSTALLATIONS_PATH}}
+          downloaded_filename: ${{env.INSTALLATIONS_PATH}}/index.json
           authorization: ${{ env.AUTH }}
