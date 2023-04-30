@@ -80,7 +80,7 @@ jobs:
         run: |
           echo "REPOS_FILE=$INSTALLATION_DIR/repos.json" >> "$GITHUB_ENV"
           echo "META_FILE=$INSTALLATION_DIR/installation.json" >> "$GITHUB_ENV"
-          echo "INDEX_PATH=$INSTALLATION_DIR/index.json" >> "$GITHUB_ENV"
+          echo "INSTALLATION_FILE=$INSTALLATION_DIR/index.json" >> "$GITHUB_ENV"
    
       - name: print logs
         run: |
