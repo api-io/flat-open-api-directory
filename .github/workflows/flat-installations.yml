@@ -23,6 +23,7 @@ jobs:
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
+      index_file: ${{env.REPOSITORIES_PATH}}/index.json
     steps:
       - uses: actions/checkout@v3
       - name: extract installation path
@@ -57,6 +58,8 @@ jobs:
       - name: set installation repos file path
         run: |
           echo "INSTALLATION_REPO_PATH=store/installations/${{matrix.value.id}}/repos.json" >> "$GITHUB_ENV"
+          echo "INSTALLATION_PATH=store/installations/${{matrix.value.id}}/installation.json" >> "$GITHUB_ENV"
+          echo "INDEX_PATH=store/installations/${{matrix.value.id}}/index.json" >> "$GITHUB_ENV"
           echo "INSTALLATION_DIR=store/installations/${{matrix.value.id}}" >> "$GITHUB_ENV"
       - name: print logs
         run: |
@@ -95,6 +98,7 @@ jobs:
           mkdir -p ${{env.INSTALLATION_DIR}}
           mkdir -p tmp
           
+          
 
 
 
@@ -111,22 +115,20 @@ jobs:
 #          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
       - name: update installation data
         run: |
-          jq -n -c '${{toJSON(matrix.value)}}'  > tmp/preinstall
-          echo "tmp/preinstall is $(cat tmp/preinstall)" 
-          cat tmp/preinstall > ${{env.INSTALLATION_DIR}}/installation.json
+          jq -n -c '${{toJSON(matrix.value)}}'  > ${{env.INSTALLATION_PATH}}
 
-      - name: jq -n
-        id: jq
-        continue-on-error: true
-        run: |
-          jq add -s -c '${{toJSON(matrix.value)}}'  $INSTALLATION_REPO_PATH  > tmp/install
-          echo "tmp/install is $(cat tmp/install)" 
+#      - name: jq -n
+#        id: jq
+#        continue-on-error: true
+#        run: |
+#          jq add -s -c '${{toJSON(matrix.value)}}'  $INSTALLATION_REPO_PATH  > tmp/install
+#          echo "tmp/install is $(cat tmp/install)" 
 
       - name: jq add
         id: jq2
         continue-on-error: true  
         run: |
-          jq -s add ${{env.INSTALLATION_REPO_PATH}} tmp/preinstall -c > tmp/install
+          jq -s -c add ${{env.INSTALLATION_REPO_PATH}} ${{env.INSTALLATION_PATH}} > ${{env.INDEX_PATH}}
         if: steps.jq.outcome == 'failure'
 
 
@@ -135,21 +137,26 @@ jobs:
         continue-on-error: true
 
         run: |
-          jq '. * input' $INSTALLATION_REPO_PATH tmp/preinstall >  ${{env.INSTALLATION_DIR}}/index.json
+          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >   ${{env.INDEX_PATH}}
         if: steps.jq2.outcome == 'failure'
 
       - name: copy
         id: jq4
         continue-on-error: true
         run: |
-          jq '. * input' $INSTALLATION_REPO_PATH ${{env.INSTALLATION_DIR}}/installations.json >  ${{env.INSTALLATION_DIR}}/index.json
+          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >  ${{env.INDEX_PATH}}
         if: steps.jq3.outcome == 'failure'
         
       - name: update index
         continue-on-error: true
         run: |
           jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data tmp/install -c > tmp/index
-          
+     
+      - name: update tmp index
+        continue-on-error: true
+        run: |
+          cat ${{env.INDEX_PATH}} >> tmp/index
+      
       - name: move tmp files
         run: |
           mv $tmp_index ${{needs.setup.outputs.index_file}}
