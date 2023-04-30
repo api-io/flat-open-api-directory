@@ -145,7 +145,7 @@ jobs:
       - name: add files to git
         run: |
           git add ${{env.INSTALLATION_DIR}}/*
-          git commit --amend -F
+          git commit --amend --no-edit
     
     needs: [ setup ]
     
