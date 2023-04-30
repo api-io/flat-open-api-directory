@@ -16,9 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-      repositories_dir: ${{ env.REPOSITORIES_PATH }}
       installations_dir: ${{ env.INSTALLATIONS_PATH }}
-      index_file: ${{ env.REPOSITORIES_PATH }}/index.json
+      index_file: ${{needs.setup.outputs.installations_dir}}/index.jsonl
     env:
       REPOSITORIES_PATH: ${{ vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
@@ -28,8 +27,14 @@ jobs:
         run: |
       - name: logs
         run: |
-          echo installations path is ${{ env.INSTALLATIONS_PATH }} >> $GITHUB_STEP_SUMMARY
-          echo repositories path is ${{ env.REPOSITORIES_PATH }} >> $GITHUB_STEP_SUMMARY
+          echo installations store ${{ env.INSTALLATIONS_PATH }} >> $GITHUB_STEP_SUMMARY
+     
+      - name: create or clean directories
+        run: |
+          mkdir -p ${{needs.setup.outputs.installations_dir}}
+          rm -rf ${{needs.setup.outputs.installations_dir}}/*
+          mkdir -p ${{needs.setup.outputs.installations_dir}}/tmp
+          touch ${{needs.setup.outputs.installations_dir}}/index.jsonl
       - id: set-matrix
         run: |
           JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}}/index.json)
@@ -83,14 +88,8 @@ jobs:
 
       - name: create directory if not exists
         run: |
-          mkdir -p ${{needs.setup.outputs.repositories_dir}}
-          mkdir -p ${{needs.setup.outputs.installations_dir}}
           mkdir -p ${{env.INSTALLATION_DIR}}
-          mkdir -p tmp
           
-          
-
-
 
       # The step is a Flat Action step. We fetch the repositories who installed the app and save it as repositories.json
       - name: Fetch data 
@@ -102,47 +101,19 @@ jobs:
           downloaded_filename: ${{env.INSTALLATION_REPO_PATH}}
           authorization: ${{ env.AUTH }}
           
-#          postprocess: deno run --allow-read --allow-write --allow-env --allow-net https://deno.land/x/jq/mod.ts --slurp . > ${{env.INSTALLATION_REPO_PATH}}
       - name: update installation data
         run: |
           jq -n -c '${{toJSON(matrix.value)}}'  > ${{env.INSTALLATION_PATH}}
 
-#      - name: jq -n
-#        id: jq
-#        continue-on-error: true
-#        run: |
-#          jq add -s -c '${{toJSON(matrix.value)}}'  $INSTALLATION_REPO_PATH  > tmp/install
-#          echo "tmp/install is $(cat tmp/install)" 
-
-      - name: jq add
+      - name: merge installation with repositories
         id: jq
         run: |
           jq -s -c add ${{env.INSTALLATION_REPO_PATH}} ${{env.INSTALLATION_PATH}} > ${{env.INDEX_PATH}}
 
-#
-#      - name: jq add
-#        id: jq3
-#        continue-on-error: true
-#
-#        run: |
-#          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >   ${{env.INDEX_PATH}}
-#        if: steps.jq2.outcome == 'failure'
-#
-#      - name: copy
-#        id: jq4
-#        continue-on-error: true
-#        run: |
-#          jq '. * input' $INSTALLATION_REPO_PATH $INSTALLATION_PATH >  ${{env.INDEX_PATH}}
-#        if: steps.jq3.outcome == 'failure'
-#        
-#      - name: update index
-#        continue-on-error: true
-#        run: |
-#          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data ${{env.INDEX_PATH}} -c > tmp/index
-#     
-      - name: update tmp index
+
+      - name: update global index
         run: |
-          cat ${{env.INDEX_PATH}} >> tmp/index
+          cat ${{env.INDEX_PATH}} >> ${{needs.setup.outputs.index_file}}
       
 #      - name: move tmp files
 #        run: |
@@ -154,7 +125,7 @@ jobs:
 
       - name: echo logs
         run: |
-          echo $(cat tmp/index) >> $GITHUB_STEP_SUMMARY
+          echo $(cat ${{needs.setup.outputs.index_file}}) >> $GITHUB_STEP_SUMMARY
           
       - name: add files to git
         run: |
@@ -166,7 +137,15 @@ jobs:
     
     needs: [ setup ]
     
-  
+  index:
+    runs-on: ubuntu-latest
+    needs: [ setup, scheduled ]
+    steps:
+      - name: add index file to git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add ${{needs.setup.outputs.index_file}}
   # go over the repositories files in (needs.setup.outputs.repositories_dir) and create an index.json file with array of all repositories
 #  index:
 #    runs-on: ubuntu-latest
