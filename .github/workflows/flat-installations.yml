@@ -24,12 +24,13 @@ jobs:
       INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          path: main
+#        with:
+#          path: main
         
       - name: checkout temporary branch
         id: git
         run: |
+#          cd main
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           branch=flat/runs/installations/${{github.run_id}}
@@ -55,7 +56,11 @@ jobs:
           rm -rf  ${{ env.INSTALLATIONS_PATH }}/*
           mkdir -p ${{env.INSTALLATIONS_PATH}}/tmp
           touch ${{env.INSTALLATIONS_PATH}}/index.jsonl
-          
+          git add .
+#      - name: commit changes
+#        run: |
+##          cd main
+#           git add .
   
   scheduled:
     environment: flat-api-app
@@ -74,7 +79,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{env.BRANCH}}
-          path: ${{env.INSTALLATION_DIR}}
+#          path: ${{env.INSTALLATION_DIR}}
 
       - name: checkout temporary installation branch
         run: |
