@@ -24,7 +24,8 @@ jobs:
       INSTALLATIONS_PATH: ${{ inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations', vars.APP_ID) }}
     steps:
       - uses: actions/checkout@v3
-        path: main
+        with:
+          path: main
         
       - name: checkout temporary branch
         id: git
@@ -166,7 +167,7 @@ jobs:
       - name: add index file to git
         run: | 
           git add ${{needs.setup.outputs.index_file}}
-          git -m "update log file"
+          git -m "flat: update application index file"
           git push -f
           
       - name: open PR to main
