@@ -23,7 +23,6 @@ jobs:
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
-      index_file: ${{env.REPOSITORIES_PATH}}/index.json
     steps:
       - uses: actions/checkout@v3
       - name: extract installation path
@@ -150,10 +149,9 @@ jobs:
       - name: update index
         continue-on-error: true
         run: |
-          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data tmp/install -c > tmp/index
+          jq '. + $data[0] | {(.account.login): .}' ${{needs.setup.outputs.index_file}} --slurpfile data ${{env.INDEX_PATH}} -c > tmp/index
      
       - name: update tmp index
-        continue-on-error: true
         run: |
           cat ${{env.INDEX_PATH}} >> tmp/index
       
