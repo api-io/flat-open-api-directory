@@ -24,6 +24,7 @@ jobs:
      
     outputs:
       auth: ${{ steps.generate_token.outputs.authorization }}
+      token: ${{ steps.generate_token.outputs.token }}
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       environment: flat-api-app
       
@@ -98,7 +99,7 @@ jobs:
       - name: create access token for installation using gh api
         id: create_token
         run: |
-          gh auth login --with-token  <<< ${{ steps.generate_token.outputs.authorization }}
+          gh auth login --with-token  <<< ${{ needs.app.outputs.token }}
           token=$(gh api -X POST /app/installations/${{ matrix.value.id }}/access_tokens -q .token) >> $GITHUB_OUTPUT
 #      - name: create installation token
 #        id: generate_token
