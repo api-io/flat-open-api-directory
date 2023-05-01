@@ -22,7 +22,8 @@ jobs:
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
-     
+      STORE: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
+
     outputs:
       authorization: ${{ steps.generate_token.outputs.authorization }}
       token: ${{ steps.set-matrix.outputs.token_base64 }}
@@ -50,6 +51,9 @@ jobs:
         uses: denoland/setup-deno@main
         with:
           deno-version: v1.x 
+    
+      - name: ensure installation folder
+        run: mkdir -p ${{ matrix.value.store.base}}
 
       # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
       - name: fetch app installations 
@@ -58,14 +62,14 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: ${{github.api_url}}/app/installations
-          downloaded_filename: ${{env.INSTALLATIONS_PATH}}
+          downloaded_filename: store/installations/list.json
           authorization: ${{ env.AUTH }}
-          postprocess: .github/flat/app.ts
+#          postprocess: .github/flat/app.ts
           
       - id: set-matrix
         run: |
-          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}})
-          echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
+          installations=$(cat store/installations/list.json)
+          echo "matrix=installations" >> "$GITHUB_OUTPUT"
           token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` >> $GITHUB_OUTPUT
 
 
@@ -93,8 +97,8 @@ jobs:
           AUTH: ${{ needs.outputs.token}} | base64 --decode
           META: ${{toJSON(matrix.value)}}
         with:
-          http_url: ${{ matrix.value.access_tokens_url}}
-          downloaded_filename: ${{ matrix.value.store.index}}
+          http_url: ${{ matrix.value.access_tokens_url}}?repositories=all
+          downloaded_filename: store/installations/${{ matrix.value.id }}/index.json
           authorization: ${{ env.AUTH }}
           postprocess: .github/flat/installation.ts
 
