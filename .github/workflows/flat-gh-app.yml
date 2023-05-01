@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - .github/workflows/flat-gh-app.yml # Only run a new workflow every time this file (flat.yaml) file changes
+      - flat/*
   workflow_dispatch:
     inputs:
       installations_path: 
