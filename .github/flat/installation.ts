@@ -10,7 +10,7 @@ try {
     //write repositories and installation meta
     const installation = {...meta, ...await safeRead(downloaded_filename)};
     const {id, store: {index}} = meta;
-    console.log("index " + index + " exists: " + await exists(index));
+    // console.log("index " + index + " exists: " + await exists(index));
 
     writeJSON(index, installation);
 
