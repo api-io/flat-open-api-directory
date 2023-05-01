@@ -70,7 +70,7 @@ jobs:
 
 
 
-installation:
+  installation:
     needs: app
     runs-on: ubuntu-latest
     strategy:
@@ -94,7 +94,7 @@ installation:
           META: ${{toJSON(matrix.value)}}
         with:
           http_url: ${{ matrix.value.access_tokens_url}}
-          downloaded_filename: ${{ matrix.value.store.repositories}}
+          downloaded_filename: ${{ matrix.value.store.index}}
           authorization: ${{ env.AUTH }}
           postprocess: .github/flat/installation.ts
 
