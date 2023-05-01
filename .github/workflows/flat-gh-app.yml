@@ -65,7 +65,7 @@ jobs:
           http_url: ${{github.api_url}}/app/installations
           downloaded_filename: ${{env.INSTALLATIONS_PATH}}
           authorization: ${{ env.AUTH }}
-          postprocess: .github/workflows/flat/app.ts
+          postprocess: .github/flat/app.ts
   
   installation:
     needs: app
@@ -110,4 +110,4 @@ jobs:
           http_url: ${{ matrix.value.repositories_url}}
           downloaded_filename: ${{ matrix.value.store.repositories}}
           authorization: ${{ env.AUTH }}
-          postprocess: .github/workflows/flat/installation.ts
+          postprocess: .github/flat/installation.ts
