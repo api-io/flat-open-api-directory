@@ -44,13 +44,6 @@ jobs:
         with:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
-          
-      - name: Print token
-        env:
-          TOKEN: ${{ steps.generate_token.outputs.token }}
-          AUTH:  ${{ steps.generate_token.outputs.authorization }}
-        run: |
-          echo "The generated token is masked: ${TOKEN} authorization: ${AUTH}"
      
       - name: Setup deno
         uses: denoland/setup-deno@main
@@ -83,27 +76,14 @@ jobs:
         value: ${{fromJson(needs.app.outputs.matrix)}}
 
     environment: ${{needs.app.outputs.environment}}
-      # Generates installation token for each installation 
     steps:
-#      - name: Generate token
-#        id: generate_token
-#        run: githubocto/flat@v3
-#        with:
-#          http_url: matrix.value.access_tokens_url
-#          authorization: ${{ steps.app.outputs.auth }}
-#          postprocess: .github/workflows/flat/token.ts
-#          download_filename: tmp/${{ matrix.value.id }}/token.json
+
       - name: Check out repo
         uses: actions/checkout@v3
 
       - name: ensure installation folder
         run: mkdir -p ${{ matrix.value.store.base}}
 
-#      - name: create access token for installation using gh api
-#        id: create_token
-#        run: |
-#          gh auth login --with-token ${{ needs.app.outputs.token }}
-#          token=$(gh api -X POST /app/installations/${{ matrix.value.id }}/access_tokens -q .token) >> $GITHUB_OUTPUT
       - name: create installation token
         id: generate_token
         uses: api-io/github-app-jwt@v1.2.4
@@ -117,7 +97,7 @@ jobs:
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
-          META: matrix.value.store.meta
+          META: ${{toJSON(matrix.value)}}
         with:
           http_url: ${{ matrix.value.repositories_url}}
           downloaded_filename: ${{ matrix.value.store.repositories}}
