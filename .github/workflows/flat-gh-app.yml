@@ -74,9 +74,11 @@ jobs:
       - id: set-matrix
         run: |
           echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT
+          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
+
           token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` 
           echo -n "app_token_base64=$token_base64" >> $GITHUB_OUTPUT
-          echo $app_token_base64
+          echo "$token_base64" 
 
 
   installation:
@@ -101,7 +103,7 @@ jobs:
       - name: flat app installation
         uses: githubocto/flat@v3
         env:
-          AUTH: ${{ needs.outputs.token}} | base64 --decode
+          AUTH: bearer ${{secret.APP_TOKEN}}
           META: ${{toJSON(matrix.value)}}
         with:
           http_url: ${{ matrix.value.access_tokens_url}}?repositories=all
