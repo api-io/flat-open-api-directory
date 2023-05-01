@@ -93,6 +93,9 @@ jobs:
 #          authorization: ${{ steps.app.outputs.auth }}
 #          postprocess: .github/workflows/flat/token.ts
 #          download_filename: tmp/${{ matrix.value.id }}/token.json
+      - name: Check out repo
+        uses: actions/checkout@v3
+
       - name: ensure installation folder
         run: mkdir -p ${{ matrix.value.store.base}}
 
