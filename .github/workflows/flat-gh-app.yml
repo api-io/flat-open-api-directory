@@ -96,24 +96,24 @@ jobs:
       - name: ensure installation folder
         run: mkdir -p ${{ matrix.value.store.base}}
 
-      - name: create access token for installation using gh api
-        id: create_token
-        run: |
-          gh auth login --with-token  < ${{ needs.app.outputs.token }}
-          token=$(gh api -X POST /app/installations/${{ matrix.value.id }}/access_tokens -q .token) >> $GITHUB_OUTPUT
-#      - name: create installation token
-#        id: generate_token
-#        uses: api-io/github-app-jwt@v1.2.4
-#        with:
-#          app_id: ${{ vars.APP_ID }}
-#          private_key: ${{ secrets.PRIVATE_KEY }}
-#          installation_id: ${{ matrix.value.id }}
+#      - name: create access token for installation using gh api
+#        id: create_token
+#        run: |
+#          gh auth login --with-token ${{ needs.app.outputs.token }}
+#          token=$(gh api -X POST /app/installations/${{ matrix.value.id }}/access_tokens -q .token) >> $GITHUB_OUTPUT
+      - name: create installation token
+        id: generate_token
+        uses: api-io/github-app-jwt@v1.2.4
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          installation_id: ${{ matrix.value.id }}
       
       
       - name: create or update repositories for each installation
         uses: githubocto/flat@v3
         env:
-          AUTH: Bearer ${{ steps.generate_token.outputs.token }}
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
           META: matrix.value.store.meta
         with:
           http_url: ${{ matrix.value.repositories_url}}
