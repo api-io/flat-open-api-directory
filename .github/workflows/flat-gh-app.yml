@@ -24,7 +24,7 @@ jobs:
      
     outputs:
       auth: ${{ steps.generate_token.outputs.authorization }}
-      installations: $(cat ${{env.INSTALLATIONS_PATH}})
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
       environment: flat-api-app
       
     steps: 
@@ -66,6 +66,12 @@ jobs:
           downloaded_filename: ${{env.INSTALLATIONS_PATH}}
           authorization: ${{ env.AUTH }}
           postprocess: .github/flat/app.ts
+          
+      - id: set-matrix
+        run: |
+          JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}})
+          echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
+  
   
   installation:
     needs: app
@@ -73,7 +79,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        value: ${{fromJson(needs.app.outputs.installations)}}
+        value: ${{fromJson(needs.app.outputs.matrix)}}
 
     environment: ${{needs.app.outputs.environment}}
       # Generates installation token for each installation 
@@ -86,7 +92,9 @@ jobs:
 #          authorization: ${{ steps.app.outputs.auth }}
 #          postprocess: .github/workflows/flat/token.ts
 #          download_filename: tmp/${{ matrix.value.id }}/token.json
-      
+      - name: ensure installation folder
+        run: mkdir -p ${{ matrix.value.store.base}}
+
       - name: create access token for installation using gh api
         id: create_token
         run: |

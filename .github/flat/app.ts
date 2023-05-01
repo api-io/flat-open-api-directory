@@ -5,10 +5,10 @@ const store = await ensureStoreDir();
 const downloaded_filename = Deno.args[0];
 const installations = await getInstallations();
 
-for (const installation of installations ) {
+/*for (const installation of installations ) {
     const {store: {meta}} = installation;
     writeJSON(meta, installation);
-}
+}*/
 
 writeJSON(downloaded_filename, installations);
 
@@ -28,8 +28,9 @@ async function ensureStoreDir() {
 
  function getInstallationStore(installation: { id :string }) {
     const installationDir = `${store}/${installation.id}`;
-     Deno.mkdirSync(installationDir, {recursive: true});
+     // Deno.mkdirSync(installationDir, {recursive: true});
      return {
+         base: installationDir,
          meta: `${installationDir}/meta.json`,
          repositories: `${installationDir}/repositories.json`,
          index: `${installationDir}/index.json`
