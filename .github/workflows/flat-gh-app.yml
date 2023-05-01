@@ -92,7 +92,11 @@ jobs:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           installation_id: ${{ matrix.value.id }}
-      
+
+      - name: Setup deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: v1.x
       
       - name: create or update repositories for each installation
         uses: githubocto/flat@v3
