@@ -102,7 +102,7 @@ jobs:
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
-          META: ${{toJSON(matrix.value)}}" )
+          META: ${{toJSON(matrix.value)}}
         with:
           http_url: ${{ matrix.value.repositories_url}}
           downloaded_filename: ${{ matrix.value.store.repositories}}
