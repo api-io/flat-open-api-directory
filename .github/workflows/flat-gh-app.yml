@@ -8,9 +8,9 @@ on:
       - flat/*
   workflow_dispatch:
     inputs:
-      installations_path: 
+      store: 
         type: string
-        description: installation json file URL
+        description: store directory path
   schedule:
     - cron: '0 0 1 * *' # Run this workflow every month on the first day of the month
     
@@ -21,8 +21,8 @@ jobs:
     environment: flat-api-app
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
-      INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
-      STORE: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
+      installations_path: ${{env.installations_path }}
+      store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
 
     outputs:
       authorization: ${{ steps.generate_token.outputs.authorization }}
@@ -35,8 +35,12 @@ jobs:
         id: path
         continue-on-error: true         
         run: |
-          echo installations path is ${{env.INSTALLATIONS_PATH}} >> $GITHUB_STEP_SUMMARY
+          echo "installations_path=${{env.store}}/installations" >> $GITHUB_ENV
+          echo installations path is ${{env.installations_path}} >> $GITHUB_STEP_SUMMARY
 
+      - name: ensure installation folder
+        run: mkdir -p ${{ env.installations_path}}
+        
       - name: Check out repo
         uses: actions/checkout@v3
   
@@ -52,8 +56,6 @@ jobs:
         with:
           deno-version: v1.x 
     
-      - name: ensure installation folder
-        run: mkdir -p ${{ matrix.value.store.base}}
 
       # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
       - name: fetch app installations 
@@ -62,7 +64,7 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: ${{github.api_url}}/app/installations
-          downloaded_filename: store/installations/list.json
+          downloaded_filename: ${{env.installations_path}}/list.json
           authorization: ${{ env.AUTH }}
 #          postprocess: .github/flat/app.ts
           
@@ -78,7 +80,7 @@ jobs:
     needs: app
     runs-on: ubuntu-latest
     env:
-      installation_path: store/installations/${{ matrix.value.id }}
+      installation_path: ${{needs.app.outputs.installations_path}}/${{ matrix.value.id }}
     strategy:
       max-parallel: 1
       matrix:
