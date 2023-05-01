@@ -24,7 +24,6 @@ jobs:
       store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
 
     outputs:
-      authorization: ${{ steps.generate_token.outputs.authorization }}
       token: ${{ steps.set-matrix.outputs.token_base64 }}
       matrix: ${{ steps.set-matrix.outputs.installations }}
       environment: flat-api-app
@@ -77,6 +76,7 @@ jobs:
           echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT
           token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` 
           echo "token_base64=$token_base64" >> $GITHUB_OUTPUT
+          echo $token_base64
 
 
   installation:
