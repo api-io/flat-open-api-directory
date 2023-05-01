@@ -63,7 +63,7 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: ${{github.api_url}}/app/installations
-          downloaded_filename: ${{env.INSTALLATIONS_PATH}}/index.json
+          downloaded_filename: ${{env.INSTALLATIONS_PATH}}
           authorization: ${{ env.AUTH }}
           postprocess: .github/workflows/flat/app.ts
   
