@@ -74,7 +74,7 @@ jobs:
           
       - id: set-matrix
         run: |
-          echo "installations=$(cat store/installations/list.json)" >> $GITHUB_ENV
+          echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT
           token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` >> $GITHUB_OUTPUT
 
 
