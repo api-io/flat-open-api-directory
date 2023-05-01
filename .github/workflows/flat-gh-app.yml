@@ -105,8 +105,9 @@ jobs:
         uses: githubocto/flat@v3
         env:
           AUTH: Bearer ${{ steps.generate_token.outputs.token }}
+          META: matrix.value.store.meta
         with:
           http_url: ${{ matrix.value.repositories_url}}
-          downloaded_filename: ${{env.INSTALLATIONS_PATH}}/${{ matrix.value.id }}/repositories.json
+          downloaded_filename: ${{ matrix.value.store.repositories}}
           authorization: ${{ env.AUTH }}
           postprocess: .github/workflows/flat/installation.ts

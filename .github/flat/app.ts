@@ -21,7 +21,7 @@ async function getInstallations() {
 }
 
 async function ensureStoreDir() {
-    const store = Deno.env.get("STORE") || "store/installations"
+    const store = `${Deno.env.get("STORE") || "store"}/installations`;
     await Deno.mkdir(store, {recursive: true});
     return store;
 }
