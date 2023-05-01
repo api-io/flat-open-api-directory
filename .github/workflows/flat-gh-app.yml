@@ -76,7 +76,7 @@ jobs:
           echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT
           token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` 
           echo "token_base64=$token_base64" >> $GITHUB_OUTPUT
-          echo $token_base64
+          echo "$token_base64"
 
 
   installation:
