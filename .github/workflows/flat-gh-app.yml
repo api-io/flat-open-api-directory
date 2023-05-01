@@ -24,8 +24,8 @@ jobs:
       INSTALLATIONS_PATH: ${{inputs.installations_path || vars.INSTALLATIONS_PATH || format('store/{0}/installations.json', vars.APP_ID) }}
      
     outputs:
-      auth: ${{ steps.generate_token.outputs.authorization }}
-      token: ${{ steps.generate_token.outputs.token }}
+      authorization: ${{ steps.generate_token.outputs.authorization }}
+      token: ${{ steps.set-matrix.outputs.token_base64 }}
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       environment: flat-api-app
       
@@ -52,7 +52,7 @@ jobs:
           deno-version: v1.x 
 
       # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
-      - name: Fetch installations 
+      - name: fetch app installations 
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
@@ -66,9 +66,11 @@ jobs:
         run: |
           JSON_RESPONSE=$(cat ${{env.INSTALLATIONS_PATH}})
           echo "matrix=$JSON_RESPONSE" >> "$GITHUB_OUTPUT"
-  
-  
-  installation:
+          token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` >> $GITHUB_OUTPUT
+
+
+
+installation:
     needs: app
     runs-on: ubuntu-latest
     strategy:
@@ -85,26 +87,37 @@ jobs:
       - name: ensure installation folder
         run: mkdir -p ${{ matrix.value.store.base}}
 
-      - name: create installation token
-        id: generate_token
-        uses: api-io/github-app-jwt@v1.2.4
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
-          installation_id: ${{ matrix.value.id }}
-
-      - name: Setup deno
-        uses: denoland/setup-deno@main
-        with:
-          deno-version: v1.x
-      
-      - name: create or update repositories for each installation
+      - name: flat app installation
         uses: githubocto/flat@v3
         env:
-          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+          AUTH: ${{ needs.outputs.token}} | base64 --decode
           META: ${{toJSON(matrix.value)}}
         with:
-          http_url: ${{ matrix.value.repositories_url}}
+          http_url: ${{ matrix.value.access_tokens_url}}
           downloaded_filename: ${{ matrix.value.store.repositories}}
           authorization: ${{ env.AUTH }}
           postprocess: .github/flat/installation.ts
+
+#      - name: create installation token
+#        id: generate_token
+#        uses: api-io/github-app-jwt@v1.2.4
+#        with:
+#          app_id: ${{ vars.APP_ID }}
+#          private_key: ${{ secrets.PRIVATE_KEY }}
+#          installation_id: ${{ matrix.value.id }}
+#
+#      - name: Setup deno
+#        uses: denoland/setup-deno@main
+#        with:
+#          deno-version: v1.x
+#      
+#      - name: create or update repositories for each installation
+#        uses: githubocto/flat@v3
+#        env:
+#          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+#          META: ${{toJSON(matrix.value)}}
+#        with:
+#          http_url: ${{ matrix.value.repositories_url}}
+#          downloaded_filename: ${{ matrix.value.store.repositories}}
+#          authorization: ${{ env.AUTH }}
+#          postprocess: .github/flat/installation.ts
