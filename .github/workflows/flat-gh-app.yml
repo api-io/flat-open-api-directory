@@ -32,18 +32,7 @@ jobs:
     
     
     steps: 
-      - name: extract installation path
-        id: path
-        continue-on-error: true         
-        run: |
-          echo "installations_path=${{env.store}}/installations" >> $GITHUB_ENV
-          echo installations path is ${{env.installations_path}} >> $GITHUB_STEP_SUMMARY
 
-      - name: ensure installation folder
-        run: | 
-          mkdir -p ${{ env.installations_path}} >> $GITHUB_STEP_SUMMARY
-          touch ${{env.installations_path}}/list.json >> $GITHUB_STEP_SUMMARY
-        
       - name: Check out repo
         uses: actions/checkout@v3
   
@@ -58,9 +47,21 @@ jobs:
         uses: denoland/setup-deno@main
         with:
           deno-version: v1.x 
-    
 
-      # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
+      - name: extract installation path
+        id: path
+        continue-on-error: true
+        run: |
+          echo "installations_path=${{env.store}}/installations" >> $GITHUB_ENV
+          echo installations path is ${{env.installations_path}} >> $GITHUB_STEP_SUMMARY
+
+      - name: ensure installation folder
+        run: |
+          mkdir -p ${{ env.installations_path}} >> $GITHUB_STEP_SUMMARY
+          find ${{ env.installations_path}} 
+          
+          
+          # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
       - name: fetch app installations 
         uses: githubocto/flat@v3
         env:
