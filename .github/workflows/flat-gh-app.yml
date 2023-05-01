@@ -77,6 +77,8 @@ jobs:
   installation:
     needs: app
     runs-on: ubuntu-latest
+    env:
+      installation_path: store/installations/${{ matrix.value.id }}
     strategy:
       max-parallel: 1
       matrix:
@@ -89,7 +91,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: ensure installation folder
-        run: mkdir -p ${{ matrix.value.store.base}}
+        run: mkdir -p ${{env.installation_path}}
 
       - name: flat app installation
         uses: githubocto/flat@v3
@@ -98,7 +100,7 @@ jobs:
           META: ${{toJSON(matrix.value)}}
         with:
           http_url: ${{ matrix.value.access_tokens_url}}?repositories=all
-          downloaded_filename: store/installations/${{ matrix.value.id }}/index.json
+          downloaded_filename:  ${{env.installation_path}}/index.json
           authorization: ${{ env.AUTH }}
           postprocess: .github/flat/installation.ts
 
