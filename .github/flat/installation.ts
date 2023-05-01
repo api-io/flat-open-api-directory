@@ -3,6 +3,8 @@ import {readJSON, writeJSON} from 'https://deno.land/x/flat/mod.ts';
 
 try {
     const downloaded_filename = Deno.args[0];
+    console.log(Deno.env.get("META"));
+
     const meta = JSON.parse(Deno.env.get("META") || "{}")
     console.log(meta);
     // console.log("downloaded_filename: " + downloaded_filename + " exists: " + await exists(downloaded_filename));
