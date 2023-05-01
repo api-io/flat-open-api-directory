@@ -21,7 +21,6 @@ jobs:
     environment: flat-api-app
     env:
       REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
-      installations_path: ${{env.installations_path }}
       store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
 
     outputs:
@@ -29,7 +28,9 @@ jobs:
       token: ${{ steps.set-matrix.outputs.token_base64 }}
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       environment: flat-api-app
-      
+      installations_path: ${{env.installations_path }}
+    
+    
     steps: 
       - name: extract installation path
         id: path
