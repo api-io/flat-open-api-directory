@@ -79,7 +79,7 @@ jobs:
           echo  "app_token_base64=$token_base64" >> $GITHUB_ENV
           echo "$token_base64" 
           echo $app_token_base64
-          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
+#          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
 
         env:
           GH_TOKEN: ${{ github.token }}
