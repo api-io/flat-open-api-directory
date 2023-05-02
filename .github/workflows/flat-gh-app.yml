@@ -70,27 +70,10 @@ jobs:
           downloaded_filename: ${{env.installations_path}}/list.json
           authorization: ${{ env.AUTH }}
 #          postprocess: .github/flat/app.ts
-      - name: token
-        shell: bash
-        id: token
-        env: 
-          TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          token_base64=`echo -n $TOKEN | base64 -w 0`    
-          echo -n "token_base64=$token_base64" >> $GITHUB_OUTPUT
-          
-      - name: echo
-        run: |
-          echo ${{ steps.token.outputs.token_base64 }}
 
       - id: set-matrix
         run: |
           echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT 
-          token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` 
-          echo -n "app_token_base64=$token_base64" >> $GITHUB_OUTPUT
-          echo  "app_token_base64=$token_base64" >> $GITHUB_ENV
-          echo "$token_base64" 
-          echo $app_token_base64
 #          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
 
         env:
@@ -116,10 +99,17 @@ jobs:
       - name: ensure installation folder
         run: mkdir -p ${{env.installation_path}}
 
+      - name: Generate token
+        id: generate_token
+        uses: api-io/github-app-jwt@v1.2.3
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+
       - name: flat app installation
         uses: githubocto/flat@v3
         env:
-          AUTH: bearer ${{secrets.APP_TOKEN}}
+          AUTH: bearer ${{ steps.generate_token.outputs.token}}
           META: ${{toJSON(matrix.value)}}
         with:
           http_url: ${{ matrix.value.access_tokens_url}}?repositories=all
