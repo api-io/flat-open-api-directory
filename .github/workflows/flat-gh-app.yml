@@ -59,6 +59,15 @@ jobs:
           mkdir -p ${{ env.installations_path}} >> $GITHUB_STEP_SUMMARY
           find ${{ env.installations_path}} 
           
+      - name: fetch app  
+        uses: githubocto/flat@v3
+        env:
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+        with:
+          http_url: ${{github.api_url}}/app/installations
+          downloaded_filename: ${{env.installations_path}}/list.json
+          authorization: ${{ env.AUTH }}
+          
           
           # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
       - name: fetch app installations 
