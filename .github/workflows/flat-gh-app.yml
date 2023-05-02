@@ -112,10 +112,17 @@ jobs:
           AUTH: bearer ${{ steps.generate_token.outputs.token}}
           META: ${{toJSON(matrix.value)}}
         with:
-          http_url: ${{ matrix.value.access_tokens_url}}?repositories=all
-          downloaded_filename:  ${{env.installation_path}}/index.json
+          http_url: /app/installations/${{ matrix.value.id }}
+          downloaded_filename: ${{env.installation_path}}/index.json
           authorization: ${{ env.AUTH }}
-          postprocess: .github/flat/installation.ts
+      
+      - name: dispatches reload installation event
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: reload-installation
+          client-payload: cat ${{env.installation_path}}/index.json
 
 #      - name: create installation token
 #        id: generate_token
