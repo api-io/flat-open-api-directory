@@ -103,7 +103,7 @@ jobs:
       - name: flat app installation
         uses: githubocto/flat@v3
         env:
-          AUTH: bearer ${{secret.APP_TOKEN}}
+          AUTH: bearer ${{secrets.APP_TOKEN}}
           META: ${{toJSON(matrix.value)}}
         with:
           http_url: ${{ matrix.value.access_tokens_url}}?repositories=all
