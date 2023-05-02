@@ -24,7 +24,7 @@ jobs:
       store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
 
     outputs:
-      token: ${{ steps.set-matrix.outputs.app_token_base64 }}
+      token: ${{ steps.token.outputs.token_base64 }}
       matrix: ${{ steps.set-matrix.outputs.installations }}
       environment: flat-api-app
       installations_path: ${{env.installations_path }}
@@ -70,7 +70,19 @@ jobs:
           downloaded_filename: ${{env.installations_path}}/list.json
           authorization: ${{ env.AUTH }}
 #          postprocess: .github/flat/app.ts
+      - name: token
+        shell: bash
+        id: token
+        env: 
+          TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          token_base64=`echo -n $TOKEN | base64 -w 0`    
+          echo -n "token_base64=$token_base64" >> $GITHUB_OUTPUT
           
+      - name: echo
+        run: |
+          echo ${{ steps.token.outputs.token_base64 }}
+
       - id: set-matrix
         run: |
           echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT 
