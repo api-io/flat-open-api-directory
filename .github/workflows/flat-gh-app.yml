@@ -73,12 +73,14 @@ jobs:
           
       - id: set-matrix
         run: |
-          echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT
-          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
-
+          echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT 
           token_base64=`echo -n ${{ steps.generate_token.outputs.token }} | base64 -w 0` 
           echo -n "app_token_base64=$token_base64" >> $GITHUB_OUTPUT
+          echo  "app_token_base64=$token_base64" >> $GITHUB_ENV
           echo "$token_base64" 
+          echo $app_token_base64
+          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
+
         env:
           GH_TOKEN: ${{ github.token }}
 
