@@ -65,12 +65,16 @@ jobs:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           installation_id: ${{ env.id }}
-            
+      
+      - name: jq
+        run: |
+          repositories_url=jq -s -r '.repositories_url' ${{env.installation_path}}/index.json >> $GITHUB_ENV
+  
       - name: fetch repositories
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.i_token.outputs.authorization }}
         with:
-          http_url: "$(jq -r '.repositories_url' ${{env.installation_path}}/index.json)"
+          http_url: ${{env.repositories_url}}
           downloaded_filename: ${{env.installation_path}}/repositories.json
           authorization: ${{ env.AUTH }}
