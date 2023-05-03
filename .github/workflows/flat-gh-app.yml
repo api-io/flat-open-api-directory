@@ -40,7 +40,7 @@ jobs:
 
       - name: Check out repo
         uses: actions/checkout@v3
-  
+   
       - name: Generate token
         id: generate_token
         uses: api-io/github-app-jwt@v1.2.3

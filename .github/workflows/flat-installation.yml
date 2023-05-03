@@ -119,8 +119,9 @@ jobs:
           repositories="$(cat ${{env.repositories_path}}/index.json)"
           echo "$repositories"
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
+          echo `jq -r ".[] | .repositories" ${{env.repositories_path}}/index.json`
           echo "repositories=$(cat ${{env.repositories_path}}/index.json)" >> $GITHUB_OUTPUT
-          
+          jq -s -c -r '.repositories' ${{env.repositories_path}}/index.json 
    
   
   
