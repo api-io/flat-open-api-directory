@@ -118,7 +118,10 @@ jobs:
             "src": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
             "environment": "${{needs.app.outputs.environment}}" ,
             "store": "${{needs.app.outputs.store}}",
-            "repositories_url" : "${{ matrix.value.repositories_url }}"
+            "links": {
+              "self": "${{github.api_url}}/app/installations/${{ matrix.value.id }},
+              "repositories" : "${{ matrix.value.repositories_url }}",              
+              }
           }'
           
  

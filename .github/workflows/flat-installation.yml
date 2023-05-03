@@ -26,7 +26,7 @@ jobs:
       store: ${{github.event.client_payload.store }}
       id: ${{ github.event.client_payload.id }}
       src: ${{ github.event.client_payload.src }}
-      repositories_url: ${{ github.event.client_payload.repositories_url }}
+      repositories_url: ${{ github.event.client_payload.links.repositories }}
       installation_path: ${{github.event.client_payload.store }}/installations/${{github.event.client_payload.id}}
       repositories_path: ${{github.event.client_payload.store }}/installations/${{github.event.client_payload.id}}/repositories
     steps:
