@@ -82,7 +82,7 @@ jobs:
 
       - id: set-matrix
         run: |
-          echo "installations=$(jq '.id' store/installations/list.json)" >> $GITHUB_OUTPUT 
+          echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT 
 #          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
 
         env:
