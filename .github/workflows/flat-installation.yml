@@ -77,6 +77,6 @@ jobs:
         env:
           AUTH:  ${{ steps.i_token.outputs.authorization }}
         with:
-          http_url: ${{ steps.jq.outputs.repositories_url }}
+          http_url: ${{ steps.jq.outputs.value }}
           downloaded_filename: ${{env.installation_path}}/repositories.json
           authorization: ${{ env.AUTH }}
