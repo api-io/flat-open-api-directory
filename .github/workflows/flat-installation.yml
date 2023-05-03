@@ -65,16 +65,18 @@ jobs:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           installation_id: ${{ env.id }}
-      
-      - name: jq
-        run: |
-          repositories_url=jq -s -r '.repositories_url' ${{env.installation_path}}/index.json >> $GITHUB_ENV
-  
+
+      - name: Extract repositories_url from package.json
+        uses: sergeysova/jq-action@v2
+        id: jq
+        with:
+          cmd: 'jq .repositories_url  ${{env.installation_path}}/index.json -r'
+
       - name: fetch repositories
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.i_token.outputs.authorization }}
         with:
-          http_url: ${{env.repositories_url}}
+          http_url: ${{ steps.jq.outputs.repositories_url }}
           downloaded_filename: ${{env.installation_path}}/repositories.json
           authorization: ${{ env.AUTH }}
