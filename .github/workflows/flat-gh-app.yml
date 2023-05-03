@@ -119,9 +119,8 @@ jobs:
         uses: githubocto/flat@v3
         env:
           AUTH: bearer ${{ steps.generate_token.outputs.token}}
-          META: ${{toJSON(matrix.value)}}
         with:
-          http_url: /app/installations/${{ matrix.value.id }}
+          http_url: ${{github.api_url}}/app/installations/${{ matrix.value.id }}
           downloaded_filename: ${{env.installation_path}}/index.json
           authorization: ${{ env.AUTH }}
       
