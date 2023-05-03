@@ -131,10 +131,10 @@ jobs:
           repository: ${{ github.repository }}
           event-type: reload-installation
           client-payload: '{
-            "id": ${{ matrix.value.id }},
-            "path": ${{env.installation_path}},
-            "index": ${{env.installation_path}}/index.json,
-            "environment": ${{needs.app.outputs.environment}}                      
+            "id": "${{ matrix.value.id }}",
+            "path": "${{env.installation_path}}",
+            "index": "${{env.installation_path}}/index.json",
+            "environment": "${{needs.app.outputs.environment}}"                      
           }'
           
 
