@@ -131,15 +131,9 @@ jobs:
           repository: ${{ github.repository }}
           event-type: reload-installation
           client-payload: '{
-            "id": "${{ matrix.value.id }}",
-            "path": "${{env.installation_path}}",
-            "index": "${{env.installation_path}}/index.json",
+            "type": "installation",
+            "id": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
             "environment": "${{needs.app.outputs.environment}}",
-            "links": {
-              "self": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
-              "repositories": "${{github.api_url}}/app/installations/${{ matrix.value.id }}/repositories",
-              "token": "${{github.api_url}}/app/installations/${{ matrix.value.id }}/access_tokens"
-            }                      
           }'
           
 
