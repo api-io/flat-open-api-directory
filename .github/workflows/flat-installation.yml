@@ -1,0 +1,66 @@
+
+name: scraping installation
+
+on:
+  push:
+    paths:
+      - .github/workflows/flat-installation.yml # Only run a new workflow every time this file (flat.yaml) file changes
+      - flat/*
+  
+
+  repository_dispatch:
+    types: [reload-installation]
+  
+    
+
+jobs:
+  installation:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.client_payload.environment }}
+    env:
+      store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
+      id: ${{ github.event.client_payload.id }}
+      src: ${{ github.event.client_payload.src }}
+      installation_path: ${{env.installations_path}}/${{ github.event.client_payload.id }}
+    
+    
+    steps:
+
+      - name: setup store
+        id: path
+        continue-on-error: true
+        run: |
+          echo "installations_path=${{env.store}}/installations" >> $GITHUB_ENV
+          echo installations path is ${{env.installations_path}} >> $GITHUB_STEP_SUMMARY
+          echo "installation_path=$installations_path/${{ matrix.value.id }}">> $GITHUB_ENV
+        
+        
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: ensure installation folder
+        run: mkdir -p $installation_path
+
+      - name: Setup deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: v1.x
+          
+
+      - name: create installation token
+        id: generate_token
+        uses: api-io/github-app-jwt@v1.2.4
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          installation_id: ${{ matrix.value.id }}
+
+
+      - name: create or update repositories for each installation
+        uses: githubocto/flat@v3
+        env:
+          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+        with:
+          http_url: ${{env.src}}
+          downloaded_filename: ${{env.installation_path}}/index.json
+          authorization: ${{ env.AUTH }}
