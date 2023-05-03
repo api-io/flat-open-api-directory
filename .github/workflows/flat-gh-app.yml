@@ -120,7 +120,7 @@ jobs:
             "store": "${{needs.app.outputs.store}}",
             "links": {
               "self": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
-              "repositories" : "${{ matrix.value.repositories_url }}",              
+              "repositories" : "${{ matrix.value.repositories_url }}"          
               }
           }'
           
