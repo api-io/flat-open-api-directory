@@ -132,7 +132,7 @@ jobs:
           event-type: reload-installation
           client-payload: '{
             "type": "installation",
-            "id": "{{ matrix.value.id }}",
+            "id": "${{ matrix.value.id }}",
             "src": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
             "environment": "${{needs.app.outputs.environment}}"
           }'
