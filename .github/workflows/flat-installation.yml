@@ -5,7 +5,7 @@ on:
   
 
   repository_dispatch:
-    types: [reload-installation]
+    types: ["reload-installation"]
   
 run-name: flat installation ${{ github.event.client_payload.id }}
     
@@ -49,14 +49,19 @@ jobs:
         run: |
           mkdir -p $installation_path
           mkdir -p $repositories_path
-          
+          echo "::debug::${{env.GITHUB_API_URL}}"
+          echo "::debug::client_payload ${{toJSON(github.event.client_payload)}}"
+          echo "::debug::repositories_url ${{env.repositories_url}}"
 
-      - name: create installation token
+      - name: create app token
         id: app_token
         uses: api-io/github-app-jwt@v1.2.4
         with:
-          app_id: ${{ vars.APP_ID }}
+          github_api_url: https://api.github.com
           private_key: ${{ secrets.PRIVATE_KEY }}
+          app_id: {{ vars.APP_ID }}
+          #app_id: ${{ env.APP_ID}}
+
 
 
       - name: fetch installation
@@ -71,17 +76,17 @@ jobs:
 
       - name: create installation token
         id: i_token
-        uses: api-io/github-app-jwt@v1.2.4
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
-          installation_id: ${{ env.id }}
-
+        env:
+          AUTH: bearer ${{ steps.app_token.outputs.token }}
+        run: |
+          echo "authorization=$AUTH" >> $GITHUB_ENV
+          echo "token=$(gh api -X POST -H "authorization=bearer $authorization" /app/installations/${{env.id}}/access_tokens --jq -r .token)" >> $GITHUB_OUTPUT
+ 
  
       - name: fetch repositories
         uses: githubocto/flat@v3
         env:
-          AUTH:  ${{ steps.i_token.outputs.authorization }}
+          AUTH: bearer ${{ steps.i_token.outputs.token }}
         with:
           http_url: ${{ env.repositories_url }}
           downloaded_filename: ${{env.repositories_path}}/index.json
@@ -90,9 +95,10 @@ jobs:
       - id: json
         name: set output
         run: |
-          repositories=$(cat ${{env.repositories_path}}/index.json)
-          echo $repositories
-          echo "::set-output name=repositories::$repositories"
+          repositories="$(cat ${{env.repositories_path}}/index.json)"
+          echo "$repositories"
+          echo "repositories=$repositories" >> $GITHUB_OUTPUT
+          
    
   
   
