@@ -114,16 +114,16 @@ jobs:
         with:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
-#
-#      - name: flat app installation
-#        uses: githubocto/flat@v3
-#        env:
-#          AUTH: bearer ${{ steps.generate_token.outputs.token}}
-#          META: ${{toJSON(matrix.value)}}
-#        with:
-#          http_url: /app/installations/${{ matrix.value.id }}
-#          downloaded_filename: ${{env.installation_path}}/index.json
-#          authorization: ${{ env.AUTH }}
+
+      - name: flat app installation
+        uses: githubocto/flat@v3
+        env:
+          AUTH: bearer ${{ steps.generate_token.outputs.token}}
+          META: ${{toJSON(matrix.value)}}
+        with:
+          http_url: /app/installations/${{ matrix.value.id }}
+          downloaded_filename: ${{env.installation_path}}/index.json
+          authorization: ${{ env.AUTH }}
       
       - name: dispatches reload installation event
         uses: peter-evans/repository-dispatch@v1
@@ -131,7 +131,14 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           event-type: reload-installation
-          client-payload: ${{ toJSON(matrix.value) }}
+          client-payload: {
+            "id": ${{ matrix.value.id }},
+            "path": ${{env.installation_path}},
+            "index": ${{env.installation_path}}/index.json,
+            "environment": ${{needs.app.outputs.environment}}
+            
+            
+          }
 
 #      - name: create installation token
 #        id: generate_token
