@@ -62,7 +62,7 @@ jobs:
         id: app_token
         uses: api-io/github-app-jwt@v1.2.4
         with:
-          github_api_url: https://api.github.com
+          github_api_url: ${{env.GITHUB_API_URL}}
           private_key: ${{ secrets.PRIVATE_KEY }}
           app_id: ${{env.APP_ID}}
 
@@ -76,15 +76,32 @@ jobs:
           http_url: ${{env.index_url}}
           downloaded_filename: ${{env.installation_path}}/index.json
           authorization: ${{ env.AUTH }}
+#      - name: install gh-cli
+#        run: |
+#            curl -sL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /usr/share/keyrings/githubcli-archive-keyring.gpg > /dev/null
+#            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+#            sudo apt update
+#            sudo apt install gh
           
-
       - name: create installation token
         id: i_token
-        env:
-          AUTH: bearer ${{ steps.app_token.outputs.token }}
-        run: |
-          echo "authorization=$AUTH" >> $GITHUB_ENV
-          echo "token=$(gh api -X POST -H "authorization=bearer $authorization" /app/installations/${{env.id}}/access_tokens --jq -r .token)" >> $GITHUB_OUTPUT
+        uses: api-io/github-app-jwt@v1.2.4
+        with:
+          github_api_url: ${{env.GITHUB_API_URL}}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          app_id: ${{env.APP_ID}}
+          installation_id: ${{env.id}}
+          
+#      - name: create installation token
+#        id: i_token_1
+#        continue-on-error: false
+#        env:
+#          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+#          AUTH: bearer ${{ steps.app_token.outputs.token }}
+#        run: |
+#          echo "authorization=$AUTH" >> $GITHUB_ENV
+#          gh api -X POST -H "authorization:bearer ${{env.AUTH}}" /app/installations/$id/access_tokens 
+#          echo "token=$(gh api -X POST -H "authorization:bearer ${{env.AUTH}}" /app/installations/$id/access_tokens --jq -r '.token')" >> $GITHUB_OUTPUT
  
  
       - name: fetch repositories
