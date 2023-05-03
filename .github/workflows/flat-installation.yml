@@ -44,7 +44,11 @@ jobs:
 #        run: |
 #          echo "installation_path=${{env.store}}/installations/${{env.id}}">> $GITHUB_ENV
 #          echo "repositories_path=$installation_path/repositories">> $GITHUB_ENV
-         
+      - name: set app_id
+        run: app_id=${{(vars.APP_ID }}=>> $GITHUB_ENV
+        if: ${{ !env.ACT }}
+      
+      
       - name: ensure folders
         run: |
           mkdir -p $installation_path
@@ -52,6 +56,7 @@ jobs:
           echo "::debug::${{env.GITHUB_API_URL}}"
           echo "::debug::client_payload ${{toJSON(github.event.client_payload)}}"
           echo "::debug::repositories_url ${{env.repositories_url}}"
+          echo "::debug::APP_ID ${{env.APP_ID}}"
 
       - name: create app token
         id: app_token
@@ -59,8 +64,7 @@ jobs:
         with:
           github_api_url: https://api.github.com
           private_key: ${{ secrets.PRIVATE_KEY }}
-          app_id: {{ vars.APP_ID }}
-          #app_id: ${{ env.APP_ID}}
+          app_id: ${{env.APP_ID}}
 
 
 
