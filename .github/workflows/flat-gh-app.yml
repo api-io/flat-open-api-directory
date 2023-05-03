@@ -27,7 +27,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.installations }}
       environment: flat-api-app
       installations_path: ${{env.installations_path }}
-    
+      store: ${{env.store}}
     
     steps:
 
@@ -65,7 +65,7 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: ${{github.api_url}}/app
-          downloaded_filename: ${{env.store}}/app.json
+          downloaded_filename: ${{env.store}}/index.json
           authorization: ${{ env.AUTH }}
           
           
@@ -76,15 +76,13 @@ jobs:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
           http_url: ${{github.api_url}}/app/installations
-          downloaded_filename: ${{env.installations_path}}/list.json
+          downloaded_filename: ${{env.installations_path}}/index.json
           authorization: ${{ env.AUTH }}
-#          postprocess: .github/flat/app.ts
-
+ 
       - id: set-matrix
         run: |
-          echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT 
-#          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
-
+          echo "installations=$(cat store/installations/index.json)" >> $GITHUB_OUTPUT 
+ 
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -107,23 +105,7 @@ jobs:
 
       - name: ensure installation folder
         run: mkdir -p ${{env.installation_path}}
-
-#      - name: Generate token
-#        id: generate_token
-#        uses: api-io/github-app-jwt@v1.2.3
-#        with:
-#          app_id: ${{ vars.APP_ID }}
-#          private_key: ${{ secrets.PRIVATE_KEY }}
-
-#      - name: flat app installation
-#        uses: githubocto/flat@v3
-#        env:
-#          AUTH: bearer ${{ steps.generate_token.outputs.token}}
-#        with:
-#          http_url: ${{github.api_url}}/app/installations/${{ matrix.value.id }}
-#          downloaded_filename: ${{env.installation_path}}/index.json
-#          authorization: ${{ env.AUTH }}
-      
+        
       - name: dispatches reload installation event
         uses: peter-evans/repository-dispatch@v1
         with:
@@ -134,30 +116,8 @@ jobs:
             "type": "installation",
             "id": "${{ matrix.value.id }}",
             "src": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
-            "environment": "${{needs.app.outputs.environment}}"
+            "environment": "${{needs.app.outputs.environment}}" ,
+            "store": "${{needs.app.outputs.store}}"
           }'
           
-
-#      - name: create installation token
-#        id: generate_token
-#        uses: api-io/github-app-jwt@v1.2.4
-#        with:
-#          app_id: ${{ vars.APP_ID }}
-#          private_key: ${{ secrets.PRIVATE_KEY }}
-#          installation_id: ${{ matrix.value.id }}
-#
-#      - name: Setup deno
-#        uses: denoland/setup-deno@main
-#        with:
-#          deno-version: v1.x
-#      
-#      - name: create or update repositories for each installation
-#        uses: githubocto/flat@v3
-#        env:
-#          AUTH:  ${{ steps.generate_token.outputs.authorization }}
-#          META: ${{toJSON(matrix.value)}}
-#        with:
-#          http_url: ${{ matrix.value.repositories_url}}
-#          downloaded_filename: ${{ matrix.value.store.repositories}}
-#          authorization: ${{ env.AUTH }}
-#          postprocess: .github/flat/installation.ts
+ 
