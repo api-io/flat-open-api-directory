@@ -82,7 +82,7 @@ jobs:
 
       - id: set-matrix
         run: |
-          echo "installations=$(cat store/installations/list.json)" >> $GITHUB_OUTPUT 
+          echo "installations=$(cat store/installations/list.json | jq .id)" >> $GITHUB_OUTPUT 
 #          gh secret set APP_TOKEN --body "${{ steps.generate_token.outputs.token }}" --env flat-api-app
 
         env:
@@ -132,7 +132,8 @@ jobs:
           event-type: reload-installation
           client-payload: '{
             "type": "installation",
-            "id": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
+            "id": "{{ matrix.value.id }}",
+            "src": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
             "environment": "${{needs.app.outputs.environment}}",
           }'
           
