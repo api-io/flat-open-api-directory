@@ -2,10 +2,6 @@
 name: scraping installation
 
 on:
-  push:
-    paths:
-      - .github/workflows/flat-installation.yml # Only run a new workflow every time this file (flat.yaml) file changes
-      - flat/*
   
 
   repository_dispatch:
@@ -53,7 +49,7 @@ jobs:
           installation_id: ${{ env.id }}
 
 
-      - name: create or update repositories for each installation
+      - name: flat installation
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
