@@ -20,7 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: flat-api-app
     env:
-      REPOSITORIES_PATH: ${{vars.REPOSITORIES_PATH || format('store/{0}/repositories', vars.APP_ID )}}
       store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
 
     outputs:
@@ -30,7 +29,14 @@ jobs:
       installations_path: ${{env.installations_path }}
     
     
-    steps: 
+    steps:
+
+      - name: setup store
+        id: path
+        continue-on-error: true
+        run: |
+          echo "installations_path=${{env.store}}/installations" >> $GITHUB_ENV
+          echo installations path is ${{env.installations_path}} >> $GITHUB_STEP_SUMMARY
 
       - name: Check out repo
         uses: actions/checkout@v3
@@ -47,12 +53,6 @@ jobs:
         with:
           deno-version: v1.x 
 
-      - name: extract installation path
-        id: path
-        continue-on-error: true
-        run: |
-          echo "installations_path=${{env.store}}/installations" >> $GITHUB_ENV
-          echo installations path is ${{env.installations_path}} >> $GITHUB_STEP_SUMMARY
 
       - name: ensure installation folder
         run: |
@@ -64,8 +64,8 @@ jobs:
         env:
           AUTH:  ${{ steps.generate_token.outputs.authorization }}
         with:
-          http_url: ${{github.api_url}}/app/installations
-          downloaded_filename: ${{env.installations_path}}/list.json
+          http_url: ${{github.api_url}}/app
+          downloaded_filename: ${{env.store}}/app.json
           authorization: ${{ env.AUTH }}
           
           
