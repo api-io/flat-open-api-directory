@@ -25,7 +25,7 @@ jobs:
     env:
       store: ${{github.event.client_payload.store }}
       id: ${{ github.event.client_payload.id }}
-      src: ${{ github.event.client_payload.src }}
+      index_url: ${{ github.event.client_payload.links.index }}
       repositories_url: ${{ github.event.client_payload.links.repositories }}
       installation_path: ${{github.event.client_payload.store }}/installations/${{github.event.client_payload.id}}
       repositories_path: ${{github.event.client_payload.store }}/installations/${{github.event.client_payload.id}}/repositories
@@ -45,7 +45,7 @@ jobs:
 #          echo "installation_path=${{env.store}}/installations/${{env.id}}">> $GITHUB_ENV
 #          echo "repositories_path=$installation_path/repositories">> $GITHUB_ENV
       - name: set app_id
-        run: app_id=${{(vars.APP_ID }}=>> $GITHUB_ENV
+        run: echo "APP_ID=${{(vars.APP_ID }}" >> $GITHUB_ENV
         if: ${{ !env.ACT }}
       
       
@@ -73,7 +73,7 @@ jobs:
         env:
           AUTH:  ${{ steps.app_token.outputs.authorization }}
         with:
-          http_url: ${{env.src}}
+          http_url: ${{env.index_url}}
           downloaded_filename: ${{env.installation_path}}/index.json
           authorization: ${{ env.AUTH }}
           
@@ -139,15 +139,16 @@ jobs:
             "full_name": "${{ matrix.value.full_name }}",
             "environment": "${{needs.app.outputs.environment}}" ,            
             "store": "${{needs.app.outputs.store}}", 
-            
-            "blobs_url": "${{ matrix.value.blobs_url }}",
-            "git_tags_url": "${{ matrix.value.git_tags_url }}",
-            "git_refs_url": "${{ matrix.value.git_refs_url }}",
-            "git_url": "${{ matrix.value.git_url }}",
-            "hooks_url": "${{ matrix.value.hooks_url }}",
-            "notifications_url": "${{ matrix.value.notifications_url }}",
-            "pulls_url": "${{ matrix.value.pulls_url }}",
-            "releases_url": "${{ matrix.value.releases_url }}",
-            "comments_url": "${{ matrix.value.comments_url }}",
-            "contents_url": "${{ matrix.value.contents_url }}"
+             "links":{
+                "blobs": "${{ matrix.value.blobs_url }}",
+                "tags": "${{ matrix.value.git_tags_url }}",
+                "refs": "${{ matrix.value.git_refs_url }}",
+                "git": "${{ matrix.value.git_url }}",
+                "hooks": "${{ matrix.value.hooks_url }}",
+                "notifications": "${{ matrix.value.notifications_url }}",
+                "pulls": "${{ matrix.value.pulls_url }}",
+                "releases": "${{ matrix.value.releases_url }}",
+                "comments": "${{ matrix.value.comments_url }}",
+                "contents": "${{ matrix.value.contents_url }}"
+            }
           }'
