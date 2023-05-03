@@ -131,14 +131,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           event-type: reload-installation
-          client-payload: {
+          client-payload: '{
             "id": ${{ matrix.value.id }},
             "path": ${{env.installation_path}},
             "index": ${{env.installation_path}}/index.json,
-            "environment": ${{needs.app.outputs.environment}}
-            
-            
-          }
+            "environment": ${{needs.app.outputs.environment}}                      
+          }'
+          
 
 #      - name: create installation token
 #        id: generate_token
