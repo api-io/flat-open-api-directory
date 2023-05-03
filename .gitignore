@@ -13,3 +13,7 @@ build
 .env.test.local
 .env.production.local
 /.idea/.idea.waffle.dir/.idea/
+.secrets
+private-key-pkcs8.key
+*.pem
+.pem
