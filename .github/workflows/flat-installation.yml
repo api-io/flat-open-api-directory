@@ -87,7 +87,7 @@ jobs:
         id: i_token
         uses: api-io/github-app-jwt@v1.2.4
         with:
-          github_api_url: ${{env.GITHUB_API_URL}}
+          github_api_url: ${{env.GITHUB_API_URL == '' && github.api_url || env.GITHUB_API_URL}}
           private_key: ${{ secrets.PRIVATE_KEY }}
           app_id: ${{env.APP_ID}}
           installation_id: ${{env.id}}
