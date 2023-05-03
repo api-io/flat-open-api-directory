@@ -88,9 +88,12 @@ jobs:
           authorization: ${{ env.AUTH }}
 
       - id: json
+        name: set output
         run: |
-          echo "repositories=$(cat ${{env.repositories_path}}/index.json)" >> $GITHUB_OUTPUT 
-  
+          repositories=$(cat ${{env.repositories_path}}/index.json)
+          echo $repositories
+          echo "::set-output name=repositories::$repositories"
+   
   
   
   repositories:
