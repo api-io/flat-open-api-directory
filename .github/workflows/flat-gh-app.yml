@@ -134,7 +134,7 @@ jobs:
             "type": "installation",
             "id": "{{ matrix.value.id }}",
             "src": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
-            "environment": "${{needs.app.outputs.environment}}",
+            "environment": "${{needs.app.outputs.environment}}"
           }'
           
 
