@@ -1,0 +1,15 @@
+{
+  "event_type": "reload-installation",
+  "ref": "main",
+  "client_payload": {
+    "type": "installation",
+    "id": "33351991",
+    "src": "https://api.github.com/app/installations/33351991",
+    "environment": "flat-api-app",
+    "store": "store/apps/284191",
+    "links": {
+      "self": "https://api.github.com/app/installations/33351991",
+      "repositories": "https://api.github.com/installation/repositories"
+    }
+  }
+}
