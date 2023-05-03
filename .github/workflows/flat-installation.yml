@@ -29,9 +29,7 @@ jobs:
         id: path
         continue-on-error: true
         run: |
-          echo "installations_path=${{env.store}}/installations" >> $GITHUB_ENV
-          echo installations path is ${{env.installations_path}} >> $GITHUB_STEP_SUMMARY
-          echo "installation_path=$installations_path/${{ matrix.value.id }}">> $GITHUB_ENV
+          echo "installation_path=${{env.store}}/installations/${{env.id}}">> $GITHUB_ENV
         
         
       - name: Check out repo
@@ -52,7 +50,7 @@ jobs:
         with:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
-          installation_id: ${{ matrix.value.id }}
+          installation_id: ${{ env.id }}
 
 
       - name: create or update repositories for each installation
