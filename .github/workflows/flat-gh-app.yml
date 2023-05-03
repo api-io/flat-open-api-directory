@@ -108,21 +108,21 @@ jobs:
       - name: ensure installation folder
         run: mkdir -p ${{env.installation_path}}
 
-      - name: Generate token
-        id: generate_token
-        uses: api-io/github-app-jwt@v1.2.3
-        with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
+#      - name: Generate token
+#        id: generate_token
+#        uses: api-io/github-app-jwt@v1.2.3
+#        with:
+#          app_id: ${{ vars.APP_ID }}
+#          private_key: ${{ secrets.PRIVATE_KEY }}
 
-      - name: flat app installation
-        uses: githubocto/flat@v3
-        env:
-          AUTH: bearer ${{ steps.generate_token.outputs.token}}
-        with:
-          http_url: ${{github.api_url}}/app/installations/${{ matrix.value.id }}
-          downloaded_filename: ${{env.installation_path}}/index.json
-          authorization: ${{ env.AUTH }}
+#      - name: flat app installation
+#        uses: githubocto/flat@v3
+#        env:
+#          AUTH: bearer ${{ steps.generate_token.outputs.token}}
+#        with:
+#          http_url: ${{github.api_url}}/app/installations/${{ matrix.value.id }}
+#          downloaded_filename: ${{env.installation_path}}/index.json
+#          authorization: ${{ env.AUTH }}
       
       - name: dispatches reload installation event
         uses: peter-evans/repository-dispatch@v1
@@ -134,7 +134,12 @@ jobs:
             "id": "${{ matrix.value.id }}",
             "path": "${{env.installation_path}}",
             "index": "${{env.installation_path}}/index.json",
-            "environment": "${{needs.app.outputs.environment}}"                      
+            "environment": "${{needs.app.outputs.environment}}",
+            "links": {
+              "self": "${{github.api_url}}/app/installations/${{ matrix.value.id }}"
+              "repositories": "${{github.api_url}}/app/installations/${{ matrix.value.id }}/repositories"
+              "token": "${{github.api_url}}/app/installations/${{ matrix.value.id }}/access_tokens"
+            }                      
           }'
           
 
