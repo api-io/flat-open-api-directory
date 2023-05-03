@@ -115,7 +115,6 @@ jobs:
           client-payload: '{
             "type": "installation",
             "id": "${{ matrix.value.id }}",
-            "src": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
             "environment": "${{needs.app.outputs.environment}}" ,
             "store": "${{needs.app.outputs.store}}",
             "links": {

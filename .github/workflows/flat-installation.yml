@@ -45,7 +45,7 @@ jobs:
 #          echo "installation_path=${{env.store}}/installations/${{env.id}}">> $GITHUB_ENV
 #          echo "repositories_path=$installation_path/repositories">> $GITHUB_ENV
       - name: set app_id
-        run: echo "APP_ID=${{(vars.APP_ID }}" >> $GITHUB_ENV
+        run: echo "APP_ID=${{vars.APP_ID}}" >> $GITHUB_ENV
         if: ${{ !env.ACT }}
       
       
