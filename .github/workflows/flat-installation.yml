@@ -41,19 +41,36 @@ jobs:
           
 
       - name: create installation token
-        id: generate_token
+        id: app_token
+        uses: api-io/github-app-jwt@v1.2.4
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+
+
+      - name: fetch installation
+        uses: githubocto/flat@v3
+        env:
+          AUTH:  ${{ steps.app_token.outputs.authorization }}
+        with:
+          http_url: ${{env.src}}
+          downloaded_filename: ${{env.installation_path}}/index.json
+          authorization: ${{ env.AUTH }}
+          
+
+      - name: create installation token
+        id: i_token
         uses: api-io/github-app-jwt@v1.2.4
         with:
           app_id: ${{ vars.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           installation_id: ${{ env.id }}
-
-
-      - name: flat installation
+            
+      - name: fetch repositories
         uses: githubocto/flat@v3
         env:
-          AUTH:  ${{ steps.generate_token.outputs.authorization }}
+          AUTH:  ${{ steps.i_token.outputs.authorization }}
         with:
-          http_url: ${{env.src}}
-          downloaded_filename: ${{env.installation_path}}/index.json
+          http_url: jq -r '.repositories_url' ${{env.installation_path}}/index.json
+          downloaded_filename: ${{env.installation_path}}/repositories.json
           authorization: ${{ env.AUTH }}
