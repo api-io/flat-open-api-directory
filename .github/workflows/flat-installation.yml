@@ -21,7 +21,6 @@ jobs:
       store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
       id: ${{ github.event.client_payload.id }}
       src: ${{ github.event.client_payload.src }}
-      installation_path: ${{env.installations_path}}/${{ github.event.client_payload.id }}
     
     
     steps:
