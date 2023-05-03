@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.client_payload.environment }}
     outputs:
-      repositories_path: ${{ steps.path.outputs.repositories }}
-      repositories: ${{ steps.json.outputs.repositories }}
+      repositories_path: ${{ env.repositories_path }}
+      matrix: ${{ steps.json.outputs.repositories }}
       environment: ${{ github.event.client_payload.environment }}
       store: ${{ github.event.client_payload.store }}
     env:
@@ -119,6 +119,7 @@ jobs:
           repositories="$(cat ${{env.repositories_path}}/index.json)"
           echo "$repositories"
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
+          echo "repositories=$(cat ${{env.repositories_path}}/index.json)" >> $GITHUB_OUTPUT
           
    
   
@@ -131,7 +132,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        value: ${{fromJson(needs.app.outputs.repositories)}}
+        value: ${{fromJson(needs.app.outputs.matrix)}}
 
     environment: ${{needs.app.outputs.environment}}
     steps:
