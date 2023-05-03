@@ -136,8 +136,8 @@ jobs:
             "index": "${{env.installation_path}}/index.json",
             "environment": "${{needs.app.outputs.environment}}",
             "links": {
-              "self": "${{github.api_url}}/app/installations/${{ matrix.value.id }}"
-              "repositories": "${{github.api_url}}/app/installations/${{ matrix.value.id }}/repositories"
+              "self": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
+              "repositories": "${{github.api_url}}/app/installations/${{ matrix.value.id }}/repositories",
               "token": "${{github.api_url}}/app/installations/${{ matrix.value.id }}/access_tokens"
             }                      
           }'
