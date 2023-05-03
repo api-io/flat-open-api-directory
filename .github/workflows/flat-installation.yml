@@ -68,7 +68,7 @@ jobs:
 
       - name: Extract repositories_url from package.json
         uses: sergeysova/jq-action@v2
-        id: jq
+        id: repositories_url
         with:
           cmd: 'jq .repositories_url  ${{env.installation_path}}/index.json -r'
 
@@ -77,6 +77,6 @@ jobs:
         env:
           AUTH:  ${{ steps.i_token.outputs.authorization }}
         with:
-          http_url: ${{ steps.jq.outputs.value }}
+          http_url: ${{ steps.repositories_url.outputs.value }}
           downloaded_filename: ${{env.installation_path}}/repositories.json
           authorization: ${{ env.AUTH }}
