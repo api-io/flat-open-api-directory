@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.client_payload.environment }}
     env:
-      store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
+      store: ${{github.event.client_payload.store }}
       id: ${{ github.event.client_payload.id }}
       src: ${{ github.event.client_payload.src }}
-    
+      
     
     steps:
 
