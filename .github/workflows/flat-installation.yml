@@ -17,31 +17,37 @@ jobs:
   installation:
     runs-on: ubuntu-latest
     environment: ${{ github.event.client_payload.environment }}
+    outputs:
+      repositories_path: ${{ steps.path.outputs.repositories }}
+      repositories: ${{ steps.json.outputs.repositories }}
+      environment: ${{ github.event.client_payload.environment }}
+      store: ${{ github.event.client_payload.store }}
     env:
       store: ${{github.event.client_payload.store }}
       id: ${{ github.event.client_payload.id }}
       src: ${{ github.event.client_payload.src }}
-      
+      repositories_url: ${{ github.event.client_payload.repositories_url }}
     
     steps:
 
-      - name: setup store
-        id: path
-        continue-on-error: true
-        run: |
-          echo "installation_path=${{env.store}}/installations/${{env.id}}">> $GITHUB_ENV
-        
-        
       - name: Check out repo
         uses: actions/checkout@v3
-
-      - name: ensure installation folder
-        run: mkdir -p $installation_path
 
       - name: Setup deno
         uses: denoland/setup-deno@main
         with:
           deno-version: v1.x
+          
+      - name: setup store
+        id: path
+        run: |
+          echo "installation_path=${{env.store}}/installations/${{env.id}}">> $GITHUB_ENV
+          echo "repositories_path=$installation_path/repositories">> $GITHUB_ENV
+         
+      - name: ensure folders
+        run: |
+          mkdir -p $installation_path
+          mkdir -p $repositories_path
           
 
       - name: create installation token
@@ -70,17 +76,64 @@ jobs:
           private_key: ${{ secrets.PRIVATE_KEY }}
           installation_id: ${{ env.id }}
 
-      - name: Extract repositories_url from package.json
-        uses: sergeysova/jq-action@v2
-        id: repositories_url
-        with:
-          cmd: 'jq .repositories_url  ${{env.installation_path}}/index.json -r'
-
+ 
       - name: fetch repositories
         uses: githubocto/flat@v3
         env:
           AUTH:  ${{ steps.i_token.outputs.authorization }}
         with:
-          http_url: ${{ steps.repositories_url.outputs.value }}
-          downloaded_filename: ${{env.installation_path}}/repositories.json
+          http_url: ${{ env.repositories_url }}
+          downloaded_filename: ${{env.repositories_path}}/index.json
           authorization: ${{ env.AUTH }}
+
+      - id: json
+        run: |
+          echo "repositories=$(cat ${{env.repositories_path}}/index.json)" >> $GITHUB_OUTPUT 
+  
+  
+  
+  repositories:
+    needs: installation
+    runs-on: ubuntu-latest
+    env:
+      repositories_path: ${{needs.app.outputs.repositories_path}}/${{ matrix.value.name }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        value: ${{fromJson(needs.app.outputs.repositories)}}
+
+    environment: ${{needs.app.outputs.environment}}
+    steps:
+
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: ensure installation folder
+        run: mkdir -p ${{env.installation_path}}
+
+      - name: dispatches reload installation event
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: repository:reload
+          client-payload: '{
+            "type": "repository",
+            "id": "${{ matrix.value.id }}",
+            "src": "${{ matrix.value.url }}",
+            "name": "${{ matrix.value.name }}",
+            "full_name": "${{ matrix.value.full_name }}",
+            "environment": "${{needs.app.outputs.environment}}" ,            
+            "store": "${{needs.app.outputs.store}}", 
+            
+            "blobs_url": "${{ matrix.value.blobs_url }}",
+            "git_tags_url": "${{ matrix.value.git_tags_url }}",
+            "git_refs_url": "${{ matrix.value.git_refs_url }}",
+            "git_url": "${{ matrix.value.git_url }}",
+            "hooks_url": "${{ matrix.value.hooks_url }}",
+            "notifications_url": "${{ matrix.value.notifications_url }}",
+            "pulls_url": "${{ matrix.value.pulls_url }}",
+            "releases_url": "${{ matrix.value.releases_url }}",
+            "comments_url": "${{ matrix.value.comments_url }}",
+            "contents_url": "${{ matrix.value.contents_url }}"
+          }'

@@ -81,7 +81,7 @@ jobs:
  
       - id: set-matrix
         run: |
-          echo "installations=$(cat store/installations/index.json)" >> $GITHUB_OUTPUT 
+          echo "installations=$(cat ${{env.installations_path}}/index.json)" >> $GITHUB_OUTPUT 
  
         env:
           GH_TOKEN: ${{ github.token }}
@@ -117,7 +117,8 @@ jobs:
             "id": "${{ matrix.value.id }}",
             "src": "${{github.api_url}}/app/installations/${{ matrix.value.id }}",
             "environment": "${{needs.app.outputs.environment}}" ,
-            "store": "${{needs.app.outputs.store}}"
+            "store": "${{needs.app.outputs.store}}",
+            "repositories_url" : "${{ matrix.value.repositories_url }}"
           }'
           
  
