@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: flat-api-app
     env:
-      store: ${{inputs.store || vars.STORE || format('store/{0}', vars.APP_ID) }}
+      store: ${{inputs.store || vars.STORE || 'store' }}/apps/${{vars.APP_ID}}
 
     outputs:
       token: ${{ steps.token.outputs.token_base64 }}
