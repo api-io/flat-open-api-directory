@@ -125,22 +125,15 @@ jobs:
         continue-on-error: true
         run: |
           reps=$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json' )
-          echo "::debug:: $rep"
-
-          echo "$reps"
-          echo $reps
-          echo "$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
+          echo "::notice:: from jq with \( $rep and quotes"
           rep="$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
-          echo "::debug:: $rep"
-          echo $rep
+          echo "::notice:: from jq with \( $rep"
           
       - name: debug-b
         continue-on-error: true
         run: |
-          echo `jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
           rep=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
-          echo "::debug:: $rep"
-          echo $rep
+          echo "::notice:: from jq with \` $rep"
 
       - name: debug-c
         continue-on-error: true
