@@ -68,7 +68,7 @@ jobs:
           downloaded_filename: ${{env.store}}/index.json
           authorization: ${{ env.AUTH }}
           
-          
+           
           # The step is a Flat Action step. We fetch the installations of the app and save it at env.INSTALLATIONS_PATH
       - name: fetch app installations 
         uses: githubocto/flat@v3

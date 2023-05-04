@@ -120,8 +120,19 @@ jobs:
           repositories=$(cat ${{env.repositories_path}}/index.json)
           echo "$repositories"
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
+                - id: json
+    
+      - name: debug
+        continue-on-error: true
+        run: |
+            reps=`jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json' ` > ${{env.repositories_path}}/index.json
+            echo "$reps"
+            echo "$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
+            rep="$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
+            echo "$rep"
           
-          
+    
+    
     # echo "rpos=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json'` >> $GITHUB_OUTPUT
 
 #          echo `jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
