@@ -120,7 +120,6 @@ jobs:
           repositories=$(cat ${{env.repositories_path}}/index.json)
           echo "$repositories"
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
-                - id: json
     
       - name: debug
         continue-on-error: true
