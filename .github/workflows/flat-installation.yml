@@ -121,8 +121,10 @@ jobs:
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
           echo `jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
           echo "repositories=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json'` >> $GITHUB_OUTPUT
-          echo "repositories=$(cat ${{env.repositories_path}}/index.json)" >> $GITHUB_OUTPUT
-          jq  -c  -r '.repositories' ${{env.repositories_path}}/index.json" > ${{env.repositories_path}}/index.json
+          repositories=$(cat ${{env.repositories_path}}/index.json)
+          echo "repositories=$repositories" >> $GITHUB_OUTPUT
+          
+#          jq  -c  -r '.repositories' ${{env.repositories_path}}/index.json" > ${{env.repositories_path}}/index.json
   
   
   
