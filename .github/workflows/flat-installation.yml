@@ -157,7 +157,17 @@ jobs:
   #          jq  -c  -r '.repositories' ${{env.repositories_path}}/index.json" > ${{env.repositories_path}}/index.json
   
   
-  
+  debug:
+    needs: installation
+    runs-on: ubuntu-latest
+    steps:
+      - name: debug
+        continue-on-error: true
+        run: |
+          echo "::debug:: repositories $repositories"
+          echo "::debug:: cat $(cat ${{env.repositories_path}}/list.json)"
+          echo "::debug:: outputs ${{needs.app.outputs.matrix}}"
+ 
   repositories:
     needs: installation
     runs-on: ubuntu-latest
