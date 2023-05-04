@@ -118,7 +118,7 @@ jobs:
         run: |
           jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json" > "${{env.repositories_path}}/list.json"
           repositories="$(cat ${{env.repositories_path}}/list.json)"
-          echo $repositories
+          echo "repositories=$repositories" >> $GITHUB_ENV
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
     
       - name: debug
@@ -145,9 +145,9 @@ jobs:
       - name: debug-c
         continue-on-error: true
         run: |
-          echo "::debug:: repositories $repositories"
-          echo "::debug:: cat $(cat ${{env.repositories_path}}/list.json)"
-          echo "::debug:: outputs ${{steps.json.outputs.repositories}}"
+          echo "::notice:: repositories $repositories"
+          echo "::notice:: cat $(cat ${{env.repositories_path}}/list.json)"
+          echo "::notice:: outputs ${{steps.json.outputs.repositories}}"
 
 
     # echo "rpos=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json'` >> $GITHUB_OUTPUT
@@ -164,9 +164,9 @@ jobs:
       - name: debug
         continue-on-error: true
         run: |
-          echo "::debug:: repositories $repositories"
-          echo "::debug:: cat $(cat ${{env.repositories_path}}/list.json)"
-          echo "::debug:: outputs ${{needs.app.outputs.matrix}}"
+          echo "::notice:: debug job repositories $repositories"
+          echo "::notice:: debug job cat $(cat ${{env.repositories_path}}/list.json)"
+          echo "::notice:: debug job outputs ${{needs.app.outputs.matrix}}"
  
   repositories:
     needs: installation
