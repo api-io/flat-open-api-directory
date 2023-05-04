@@ -145,11 +145,10 @@ jobs:
       - name: debug-c
         continue-on-error: true
         run: |
-          echo $repositories
-          echo $repositories
-          echo "::debug:: $rep"
-          echo "$(cat ${{env.repositories_path}}/list.json)"
-          echo "::debug:: $(cat ${{env.repositories_path}}/list.json)"
+          echo "::debug:: repositories $repositories"
+          echo "::debug:: cat $(cat ${{env.repositories_path}}/list.json)"
+          echo "::debug:: outputs ${{steps.json.outputs.repositories}}"
+
 
     # echo "rpos=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json'` >> $GITHUB_OUTPUT
 
