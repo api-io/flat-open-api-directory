@@ -166,19 +166,19 @@ jobs:
         run: |
           echo "::notice:: debug job repositories $repositories"
           echo "::notice:: debug job cat $(cat ${{env.repositories_path}}/list.json)"
-          echo "::notice:: debug job outputs ${{needs.app.outputs.matrix}}"
+          echo "::notice:: debug job outputs ${{needs.installation.outputs.matrix}}"
  
   repositories:
     needs: installation
     runs-on: ubuntu-latest
     env:
-      repositories_path: ${{needs.app.outputs.repositories_path}}/${{ matrix.value.name }}
+      repositories_path: ${{needs.installation.outputs.repositories_path}}/${{ matrix.value.name }}
     strategy:
       max-parallel: 1
       matrix:
-        value: ${{fromJson(needs.app.outputs.matrix)}}
+        value: ${{fromJson(needs.installation.outputs.matrix)}}
 
-    environment: ${{needs.app.outputs.environment}}
+    environment: ${{needs.installation.outputs.environment}}
     steps:
 
       - name: Check out repo
@@ -199,8 +199,8 @@ jobs:
             "src": "${{ matrix.value.url }}",
             "name": "${{ matrix.value.name }}",
             "full_name": "${{ matrix.value.full_name }}",
-            "environment": "${{needs.app.outputs.environment}}" ,            
-            "store": "${{needs.app.outputs.store}}", 
+            "environment": "${{needs.installation.outputs.environment}}" ,            
+            "store": "${{needs.installation.outputs.store}}", 
              "links":{
                 "blobs": "${{ matrix.value.blobs_url }}",
                 "tags": "${{ matrix.value.git_tags_url }}",
