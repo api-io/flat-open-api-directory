@@ -116,24 +116,41 @@ jobs:
       - id: json
         name: set output
         run: |
-          jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json" > "${{env.repositories_path}}/index.json"
-          repositories="$(cat ${{env.repositories_path}}/index.json)"
+          jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json" > "${{env.repositories_path}}/list.json"
+          repositories="$(cat ${{env.repositories_path}}/list.json)"
           echo $repositories
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
     
       - name: debug
         continue-on-error: true
         run: |
-          reps=`jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json' ` 
+          reps=$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json' )
+          echo "::debug:: $rep"
+
           echo "$reps"
           echo $reps
           echo "$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
           rep="$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
-          echo "$rep"
+          echo "::debug:: $rep"
           echo $rep
           
-    
-    
+      - name: debug-b
+        continue-on-error: true
+        run: |
+          echo `jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
+          rep=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
+          echo "::debug:: $rep"
+          echo $rep
+
+      - name: debug-c
+        continue-on-error: true
+        run: |
+          echo $repositories
+          echo $repositories
+          echo "::debug:: $rep"
+          echo "$(cat ${{env.repositories_path}}/list.json)"
+          echo "::debug:: $(cat ${{env.repositories_path}}/list.json)"
+
     # echo "rpos=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json'` >> $GITHUB_OUTPUT
 
 #          echo `jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
