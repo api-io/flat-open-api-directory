@@ -116,19 +116,21 @@ jobs:
       - id: json
         name: set output
         run: |
-          jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json" > ${{env.repositories_path}}/index.json
-          repositories=$(cat ${{env.repositories_path}}/index.json)
-          echo "$repositories"
+          jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json" > "${{env.repositories_path}}/index.json"
+          repositories="$(cat ${{env.repositories_path}}/index.json)"
+          echo $repositories
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
     
       - name: debug
         continue-on-error: true
         run: |
-            reps=`jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json' ` > ${{env.repositories_path}}/index.json
-            echo "$reps"
-            echo "$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
-            rep="$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
-            echo "$rep"
+          reps=`jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json' ` 
+          echo "$reps"
+          echo $reps
+          echo "$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
+          rep="$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
+          echo "$rep"
+          echo $rep
           
     
     
