@@ -177,10 +177,7 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v3
 
-      - name: ensure installation folder
-        run: mkdir -p ${{env.installation_path}}
-
-      - name: dispatches reload installation event
+      - name: dispatches reload repository event
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
