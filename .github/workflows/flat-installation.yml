@@ -23,12 +23,13 @@ jobs:
       environment: ${{ github.event.client_payload.environment }}
       store: ${{ github.event.client_payload.store }}
     env:
-      store: ${{github.event.client_payload.store }}
-      id: ${{ github.event.client_payload.id }}
-      index_url: ${{ github.event.client_payload.links.index }}
-      repositories_url: ${{ github.event.client_payload.links.repositories }}
-      installation_path: ${{github.event.client_payload.store }}/installations/${{github.event.client_payload.id}}
-      repositories_path: ${{github.event.client_payload.store }}/installations/${{github.event.client_payload.id}}/repositories
+      installation_id: ${{ github.event.client_payload.id }}
+      index_url: ${{ github.event.client_payload.flat.installation.src.href }}
+      repositories_url: ${{ github.event.client_payload.flat.repositories.src.href }}
+      installation_path: ${{github.event.client_payload.flat.installation.target.root }}
+      installation_index: ${{github.event.client_payload.flat.installation.target.index }}
+      repositories_path:  ${{github.event.client_payload.flat.repositories.target.root }}
+      repositories_index:  ${{github.event.client_payload.flat.repositories.target.index }}
     steps:
 
       - name: Check out repo
@@ -74,7 +75,7 @@ jobs:
           AUTH:  ${{ steps.app_token.outputs.authorization }}
         with:
           http_url: ${{env.index_url}}
-          downloaded_filename: ${{env.installation_path}}/index.json
+          downloaded_filename: ${{env.installation_index}}
           authorization: ${{ env.AUTH }}
 #      - name: install gh-cli
 #        run: |
@@ -90,7 +91,7 @@ jobs:
           github_api_url: ${{env.GITHUB_API_URL == '' && github.api_url || env.GITHUB_API_URL}}
           private_key: ${{ secrets.PRIVATE_KEY }}
           app_id: ${{env.APP_ID}}
-          installation_id: ${{env.id}}
+          installation_id: ${{env.installation_id}}
           
 #      - name: create installation token
 #        id: i_token_1
@@ -110,13 +111,13 @@ jobs:
           AUTH: bearer ${{ steps.i_token.outputs.token }}
         with:
           http_url: ${{ env.repositories_url }}
-          downloaded_filename: ${{env.repositories_path}}/index.json
+          downloaded_filename: ${{env.repositories_index}}
           authorization: ${{ env.AUTH }}
 
       - id: json
         name: set output
         run: |
-          jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json" > "${{env.repositories_path}}/list.json"
+          jq  -c  -r '.repositories' "${{env.repositories_index}}" > "${{env.repositories_path}}/list.json"
           repositories="$(cat ${{env.repositories_path}}/list.json)"
           echo "repositories=$repositories" >> $GITHUB_ENV
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
@@ -124,15 +125,15 @@ jobs:
       - name: debug
         continue-on-error: true
         run: |
-          reps=$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json' )
+          reps=$(jq  -c  -r '.repositories' '${{env.repositories_index}}' )
           echo "::notice:: from jq with \( $rep and quotes"
-          rep="$(jq  -c  -r '.repositories' '${{env.repositories_path}}/index.json')"
+          rep="$(jq  -c  -r '.repositories' '${{env.repositories_index}}')"
           echo "::notice:: from jq with \( $rep"
           
       - name: debug-b
         continue-on-error: true
         run: |
-          rep=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
+          rep=`jq  -c  -r '.repositories' "${{env.repositories_index}}"`
           echo "::notice:: from jq with \` $rep"
 
       - name: debug-c
@@ -165,7 +166,7 @@ jobs:
     needs: installation
     runs-on: ubuntu-latest
     env:
-      repositories_path: ${{needs.installation.outputs.repositories_path}}/${{ matrix.value.name }}
+      repository_path: ${{needs.installation.outputs.repositories_path}}/${{ matrix.value.name }}
     strategy:
       max-parallel: 1
       matrix:
