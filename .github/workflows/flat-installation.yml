@@ -116,15 +116,17 @@ jobs:
       - id: json
         name: set output
         run: |
-          repositories="$(cat ${{env.repositories_path}}/index.json)"
+          jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json" > ${{env.repositories_path}}/index.json
+          repositories=$(cat ${{env.repositories_path}}/index.json)
           echo "$repositories"
           echo "repositories=$repositories" >> $GITHUB_OUTPUT
-          echo `jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
-          echo "repositories=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json'` >> $GITHUB_OUTPUT
-          repositories=$(cat ${{env.repositories_path}}/index.json)
-          echo "repositories=$repositories" >> $GITHUB_OUTPUT
           
-#          jq  -c  -r '.repositories' ${{env.repositories_path}}/index.json" > ${{env.repositories_path}}/index.json
+          
+    # echo "rpos=`jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json'` >> $GITHUB_OUTPUT
+
+#          echo `jq  -c  -r '.repositories' "${{env.repositories_path}}/index.json"`
+  
+  #          jq  -c  -r '.repositories' ${{env.repositories_path}}/index.json" > ${{env.repositories_path}}/index.json
   
   
   
