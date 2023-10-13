@@ -64,7 +64,7 @@
 
     
 
-  <meta name="request-id" content="5fe02567-450d-40bd-b8ad-bdf6696b8835" data-turbo-transient="true" /><meta name="html-safe-nonce" content="e6bd4082f92f2ec39f23cd0135f0f72fef4da18cbe9dc85090b7357561881f25" data-turbo-transient="true" />
+  <meta name="request-id" content="77d6c655-3ae8-4be7-b764-aa47bf1b3bf2" data-turbo-transient="true" /><meta name="html-safe-nonce" content="aa75676c33ae40b466939673ffc86113962bd8c77408252b3e47598d9546765a" data-turbo-transient="true" />
 
 
 
@@ -247,7 +247,7 @@
     </p>
     <a class="btn btn-primary btn-block Details-content--shown" href="/login?force_external=true&amp;return_to=https%3A%2F%2Fgithub.tools.sap%2Fapp%2Finstallations">Sign in with a GitHub Enterprise License</a>
       <div class="Details-content--hidden mt-3">
-        <!-- '"` --><!-- </textarea></xmp> --></option></form><form data-turbo="false" action="/session" accept-charset="UTF-8" method="post"><input type="hidden" name="authenticity_token" value="K2ztQAbuHzwtN9rDlhCIZOVSC5bM1KQKltKNCDyqr_Az59OTrgHt59U_LvbjIIJhJyymZ-tfnvxx2M1qi37DuQ" />          <label for="login_field">
+        <!-- '"` --><!-- </textarea></xmp> --></option></form><form data-turbo="false" action="/session" accept-charset="UTF-8" method="post"><input type="hidden" name="authenticity_token" value="jJ_RJhlhZg_WI4t0b_y79jr0wFQyxngKF9sVyuRpF84AAxkfZCpxDchUYfjLdMcvg5OAKJl2h9tSuoVNwaj6lA" />          <label for="login_field">
             Username
           </label>
           <input type="text" name="login" id="login_field" class="form-control input-block" autocapitalize="off" autocorrect="off" autofocus="autofocus" />
