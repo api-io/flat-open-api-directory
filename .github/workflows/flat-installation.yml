@@ -30,6 +30,7 @@ jobs:
       installation_index: ${{github.event.client_payload.flat.installation.target.index }}
       repositories_path:  ${{github.event.client_payload.flat.repositories.target.root }}
       repositories_index:  ${{github.event.client_payload.flat.repositories.target.index }}
+      gh_api_url: ${{ github.event.client_payload.gh_api_url || env.GH_API_URL || github.api_url }} 
     steps:
 
       - name: Check out repo
@@ -54,7 +55,7 @@ jobs:
         run: |
           mkdir -p $installation_path
           mkdir -p $repositories_path
-          echo "::debug::${{env.GITHUB_API_URL}}"
+          echo "::debug::${{env.gh_api_url}}"
           echo "::debug::client_payload ${{toJSON(github.event.client_payload)}}"
           echo "::debug::repositories_url ${{env.repositories_url}}"
           echo "::debug::APP_ID ${{env.APP_ID}}"
@@ -63,7 +64,7 @@ jobs:
         id: app_token
         uses: api-io/github-app-jwt@v1.2.4
         with:
-          github_api_url: ${{env.GITHUB_API_URL == '' && github.api_url || env.GITHUB_API_URL}}
+          github_api_url: ${{ env.gh_api_url }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           app_id: ${{env.APP_ID}}
 
@@ -88,7 +89,7 @@ jobs:
         id: i_token
         uses: api-io/github-app-jwt@v1.2.4
         with:
-          github_api_url: ${{env.GITHUB_API_URL == '' && github.api_url || env.GITHUB_API_URL}}
+          github_api_url: ${{ env.gh_api_url }}
           private_key: ${{ secrets.PRIVATE_KEY }}
           app_id: ${{env.APP_ID}}
           installation_id: ${{env.installation_id}}
