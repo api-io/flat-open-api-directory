@@ -17,9 +17,7 @@ on:
           - 'enterprice-git'
       gh_api_url:
         description: 'GitHub API URL'
-        required: false
         type: string
-        default: 'https://api.github.com'
       app_id:
         description: 'GitHub App ID'
         required: false
