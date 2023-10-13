@@ -109,6 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       installation_path: ${{needs.app.outputs.installations_path}}/${{ matrix.value.id }}
+      gh_api_url: ${{needs.app.outputs.gh_api_url}}
     strategy:
       max-parallel: 1
       matrix:
@@ -130,7 +131,7 @@ jobs:
             "type": "installation",
             "id": "${{ matrix.value.id }}",
             "environment": "${{needs.app.outputs.environment}}",
-            "gh_api_url": "${{needs.app.outputs.gh_api_url}}",
+            "gh_api_url": "${{env.gh_api_url}}",
             "flat": {
               "installation": {
                 "src": {
