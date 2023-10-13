@@ -130,6 +130,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           event-type: reload-installation
+          environment: ${{needs.app.outputs.environment}},
           client-payload: ' {
             "type": "installation",
             "id": "${{ matrix.value.id }}",
