@@ -30,7 +30,7 @@ on:
 jobs:
   app:
     runs-on: ubuntu-latest
-    environment: ${{inputs.env}}
+    environment: ${{inputs.env || github.event.inputs.environment || 'flat-api-app'}}
     env:
       store: ${{inputs.store || vars.STORE || 'store' }}/apps/${{inputs.app_id || vars.APP_ID  || secrets.APP_ID}}
       gh_api_url: ${{inputs.gh_api_url || vars.GH_API_URL || github.api_url}}
