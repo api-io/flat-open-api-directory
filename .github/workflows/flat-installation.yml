@@ -30,7 +30,7 @@ jobs:
       installation_index: ${{github.event.client_payload.flat.installation.target.index }}
       repositories_path:  ${{github.event.client_payload.flat.repositories.target.root }}
       repositories_index:  ${{github.event.client_payload.flat.repositories.target.index }}
-      gh_api_url: ${{ github.event.client_payload.gh_api_url || env.GH_API_URL || github.api_url }} 
+      gh_api_url: ${{github.event.client_payload.gh_api_url || vars.GH_API_URL || github.api_url}} 
     steps:
 
       - name: Check out repo
