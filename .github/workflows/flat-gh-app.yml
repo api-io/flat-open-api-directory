@@ -11,12 +11,15 @@ on:
         description: 'environment'
         required: true
         default: 'flat-api-app'
+        type: string
       gh_api_url:
         description: 'GitHub API URL'
         required: false
+        type: string
       app_id:
         description: 'GitHub App ID'
         required: false
+        type: string
       store:
         type: string
         description: store directory path
