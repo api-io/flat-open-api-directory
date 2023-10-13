@@ -12,6 +12,9 @@ on:
         required: true
         default: 'flat-api-app'
         type: string
+        options:
+          - 'flat-api-app'
+          - 'enterprice-git'
       gh_api_url:
         description: 'GitHub API URL'
         required: false
