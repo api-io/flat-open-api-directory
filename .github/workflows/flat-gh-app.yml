@@ -67,7 +67,7 @@ jobs:
 
       - name: Generate token
         id: generate_token
-        uses: api-io/github-app-jwt@v1.2.3
+        uses: api-io/github-app-jwt@v1.2.5
         with:
           app_id: ${{ env.app_id }}
           private_key: ${{ secrets.PRIVATE_KEY }}

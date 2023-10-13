@@ -62,7 +62,7 @@ jobs:
 
       - name: create app token
         id: app_token
-        uses: api-io/github-app-jwt@v1.2.4
+        uses: api-io/github-app-jwt@v1.2.5
         with:
           github_api_url: ${{ env.gh_api_url }}
           private_key: ${{ secrets.PRIVATE_KEY }}
