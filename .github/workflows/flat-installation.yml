@@ -16,7 +16,7 @@ concurrency:
 jobs:
   installation:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.client_payload.environment || github.event.inputs.environment}}
+    environment: ${{ github.event.client_payload.environment || github.event.inputs.environment }}
     outputs:
       repositories_path: ${{ env.repositories_path }}
       matrix: ${{ steps.json.outputs.repositories }}

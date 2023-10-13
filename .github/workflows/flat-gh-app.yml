@@ -19,6 +19,7 @@ on:
         description: 'GitHub API URL'
         required: false
         type: string
+        default: 'https://api.github.com'
       app_id:
         description: 'GitHub App ID'
         required: false
@@ -70,6 +71,7 @@ jobs:
         with:
           app_id: ${{ env.app_id }}
           private_key: ${{ secrets.PRIVATE_KEY }}
+          github_api_url: ${{ env.gh_api_url }}
 
       - name: Setup deno
         uses: denoland/setup-deno@main
@@ -133,7 +135,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           event-type: reload-installation
-          environment: ${{needs.app.outputs.environment}},
           client-payload: ' {
             "type": "installation",
             "id": "${{ matrix.value.id }}",
