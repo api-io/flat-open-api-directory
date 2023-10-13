@@ -19,6 +19,7 @@ on:
         description: 'GitHub API URL'
         required: false
         type: string
+        default: '${{vars.GH_API_URL || github.api_url}}'
       app_id:
         description: 'GitHub App ID'
         required: false
