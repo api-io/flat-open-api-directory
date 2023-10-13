@@ -7,6 +7,10 @@ on:
       - flat/*
   workflow_dispatch:
     inputs:
+      env:
+        description: 'environment'
+        required: true
+        default: 'flat-api-app'
       gh_api_url:
         description: 'GitHub API URL'
         required: false
@@ -23,7 +27,7 @@ on:
 jobs:
   app:
     runs-on: ubuntu-latest
-    environment: flat-api-app
+    environment: ${{inputs.env}}
     env:
       store: ${{inputs.store || vars.STORE || 'store' }}/apps/${{inputs.app_id || vars.APP_ID  || secrets.APP_ID}}
       gh_api_url: ${{inputs.gh_api_url || vars.GH_API_URL || github.api_url}}
@@ -33,11 +37,12 @@ jobs:
     outputs:
       token: ${{ steps.token.outputs.token_base64 }}
       matrix: ${{ steps.set-matrix.outputs.installations }}
-      environment: flat-api-app
+      environment: ${{inputs.env}}
       installations_path: ${{env.installations_path }}
       installations_index: ${{env.installations_path}}/index.json
       store: ${{env.store}}
       app_path: ${{env.app_path}}
+      gh_api_url: ${{env.gh_api_url}}
     
     steps:
 
